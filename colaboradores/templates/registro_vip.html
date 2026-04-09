@@ -1,0 +1,49 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registro VIP | Intranet</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+  </head>
+  <body class="pantalla-completa">
+    <main class="tarjeta tarjeta--login">
+      <header class="cabecera-seccion">
+        <h1>Registro Zona VIP</h1>
+      </header>
+
+      <form method="POST" class="formulario-vertical">
+        {% csrf_token %}
+
+        <label for="username">Elige un usuario:</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Nuevo usuario"
+          required
+          class="input"
+        />
+
+        <label for="password">Crea una contraseña:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Nueva contraseña"
+          required
+          class="input"
+        />
+
+        <button type="submit" class="btn btn--vip btn--bloque">
+          Crear Cuenta VIP
+        </button>
+      </form>
+
+      <footer class="pie-tarjeta">
+        <a href="{% url 'login_vip' %}" class="enlace">⬅️ Volver al login</a>
+      </footer>
+    </main>
+  </body>
+</html>

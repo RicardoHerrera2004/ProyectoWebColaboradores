@@ -1,0 +1,79 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Login VIP | Intranet</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+  </head>
+  <body class="pantalla-completa">
+    <main class="tarjeta tarjeta--login">
+      <header class="cabecera-seccion">
+        <h1>Entrada a Zona VIP</h1>
+      </header>
+
+      {% if error %}
+      <div class="alerta alerta--error">
+        <p>{{ error }}</p>
+      </div>
+      {% endif %}
+
+      <form method="POST" class="formulario-vertical">
+        {% csrf_token %}
+        <label for="username">Usuario VIP:</label>
+        <input
+          type="text"
+          id="username"
+          name="username"
+          placeholder="Tu usuario"
+          required
+          class="input"
+        />
+
+        <label for="password">Contraseña secreta:</label>
+        <input
+          type="password"
+          id="password"
+          name="password"
+          placeholder="Tu contraseña"
+          required
+          class="input"
+        />
+
+        <button type="submit" class="btn btn--vip btn--bloque">Entrar</button>
+      </form>
+
+      <footer class="pie-tarjeta">
+        <div>
+          <p style="margin-bottom: 5px">¿Aún no eres VIP?</p>
+          <a href="{% url 'registro_vip' %}" class="enlace enlace--destacado">
+            Crear una cuenta aquí
+          </a>
+        </div>
+
+        <div
+          style="
+            margin-top: 25px;
+            padding-top: 15px;
+            border-top: 1px solid var(--color-borde);
+          "
+        >
+          <a
+            href="{% url 'panel' %}"
+            style="
+              color: #7f8c8d;
+              font-size: 0.9rem;
+              text-decoration: none;
+              transition: 0.2s;
+            "
+            onmouseover="this.style.color = 'var(--color-azul-primario)'"
+            onmouseout="this.style.color = '#7f8c8d'"
+          >
+            ← Volver a la página principal
+          </a>
+        </div>
+      </footer>
+    </main>
+  </body>
+</html>

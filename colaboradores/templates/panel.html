@@ -1,0 +1,134 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Principal | Inventario</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+  </head>
+  <body>
+    <header class="header-principal">
+      <nav class="navbar">
+        <h2>Intranet de Ollas</h2>
+
+        <ul class="navbar__menu">
+          <li>
+            <a href="{% url 'login_vip' %}" class="btn btn--vip">
+              Acceso VIP
+            </a>
+          </li>
+          <li>
+            <span>Hola, {{ request.user.username }}</span>
+          </li>
+          {% if request.user.is_superuser %}
+          <li>
+            <a href="/admin/">Administrar</a>
+          </li>
+          {% endif %}
+          <li>
+            <form
+              action="{% url 'logout' %}"
+              method="post"
+              class="formulario-en-linea"
+            >
+              {% csrf_token %}
+              <button type="submit" class="btn--texto-peligro">
+                Cerrar Sesión
+              </button>
+            </form>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="contenedor">
+      <section class="tarjeta tarjeta--creacion">
+        <header>
+          <h2>➕ Agregar Nuevo Producto</h2>
+        </header>
+        <form
+          action="{% url 'crear_producto' %}"
+          method="POST"
+          class="formulario-producto"
+        >
+          {% csrf_token %}
+          <input
+            type="text"
+            name="nombre"
+            placeholder="Nombre de la Olla"
+            required
+            class="input input--expand"
+          />
+          <input
+            type="number"
+            name="precio"
+            placeholder="Precio ($)"
+            step="0.01"
+            required
+            class="input input--corto"
+          />
+          <input
+            type="number"
+            name="stock"
+            placeholder="Stock"
+            required
+            class="input input--corto"
+          />
+          <button type="submit" class="btn btn--exito">Guardar</button>
+        </form>
+      </section>
+
+      <section class="catalogo">
+        <header>
+          <h2>Catálogo de Productos</h2>
+        </header>
+
+        <ul class="grid-productos">
+          {% for producto in productos %}
+          <li class="tarjeta">
+            <article>
+              <header class="tarjeta__cabecera">
+                <h3>{{ producto.nombre }}</h3>
+              </header>
+
+              <div class="tarjeta__cuerpo">
+                <p><strong>Precio:</strong> ${{ producto.precio }}</p>
+                <p>
+                  <strong>Stock disponible:</strong> {{ producto.stock }}
+                  unidades
+                </p>
+              </div>
+
+              <footer class="tarjeta__acciones">
+                <a
+                  href="{% url 'editar_producto' producto.id %}"
+                  class="btn btn--advertencia"
+                  >Editar</a
+                >
+
+                <form
+                  action="{% url 'eliminar_producto' producto.id %}"
+                  method="POST"
+                  onsubmit="
+                    return confirm('¿Seguro que deseas eliminar esta olla?');
+                  "
+                >
+                  {% csrf_token %}
+                  <button type="submit" class="btn btn--peligro">
+                    Eliminar
+                  </button>
+                </form>
+              </footer>
+            </article>
+          </li>
+          {% empty %}
+          <li class="mensaje-vacio">
+            <p>No hay productos registrados aún.</p>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+    </main>
+  </body>
+</html>
