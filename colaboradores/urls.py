@@ -15,5 +15,8 @@ urlpatterns = [
     path('vip/login/', views.login_vip, name='login_vip'),
     path('vip/zona-secreta/', views.zona_secreta, name='zona_secreta'),
     path('vip/logout/', views.logout_vip, name='logout_vip'),
+
+    # Urls de Ventas
+    path('registrar-venta/', views.registrar_venta, name='registrar_venta'),
 ]
 

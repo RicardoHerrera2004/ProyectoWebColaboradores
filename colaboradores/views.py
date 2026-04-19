@@ -1,7 +1,8 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from .models import Producto, UsuarioVIP
+from .models import Producto, UsuarioVIP, Venta, ComisionCalculada, Vendedor, Producto
 from django.contrib.auth.hashers import make_password, check_password
+from django.contrib import messages
 
 #LISTA DE LOS PRODUCTOS
 @login_required(login_url='/login/') 
@@ -86,3 +87,43 @@ def logout_vip(request):
         del request.session['vip_id']
         del request.session['vip_nombre']
     return redirect('login_vip')
+
+#MINICORE
+@login_required(login_url='/login/')
+def registrar_venta(request):
+    if request.method == 'POST':
+        vendedor_id = request.POST.get('vendedor')
+        producto_id = request.POST.get('producto')
+        cantidad = int(request.POST.get('cantidad'))
+        
+        vendedor = Vendedor.objects.get(id=vendedor_id)
+        producto = Producto.objects.get(id=producto_id)
+        
+        monto_total = producto.precio * cantidad
+        
+        nueva_venta = Venta.objects.create(
+            vendedor=vendedor,
+            producto=producto,
+            cantidad=cantidad,
+            monto=monto_total
+        )
+        
+        monto_comision = nueva_venta.calcular_comision()
+        
+        if monto_comision > 0:
+            ComisionCalculada.objects.create(
+                venta=nueva_venta,
+                monto_comision=monto_comision
+            )
+            
+        messages.success(request, f'Venta registrada con éxito. Comisión generada: ${monto_comision}')
+        return redirect('registrar_venta') 
+
+    else:
+        vendedores = Vendedor.objects.all()
+        productos = Producto.objects.all()
+        contexto = {
+            'vendedores': vendedores,
+            'productos': productos
+        }
+        return render(request, 'registrar_venta.html', contexto)

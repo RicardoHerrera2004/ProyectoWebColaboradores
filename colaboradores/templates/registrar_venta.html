@@ -1,0 +1,97 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Registrar Nueva Venta | Inventario</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+  </head>
+  <body>
+    <header class="header-principal">
+      <nav class="navbar">
+        <h2 class="navbar__brand">Intranet de Ollas</h2>
+        <ul class="navbar__menu">
+          <li>
+            <a href="{% url 'panel' %}" class="btn btn--enlace">
+              ⬅️ Volver al Panel
+            </a>
+          </li>
+          <li>
+            <span>Hola, {{ request.user.username }}</span>
+          </li>
+        </ul>
+      </nav>
+    </header>
+
+    <main class="contenedor">
+      <header class="cabecera-seccion">
+        <h2>💰 Registro de Nueva Venta</h2>
+        <p>
+          Selecciona los detalles para procesar la transacción y calcular
+          comisiones.
+        </p>
+      </header>
+
+      {% if messages %} {% for message in messages %}
+      <aside
+        class="alerta alerta--error"
+        style="
+          background-color: #d4edda;
+          color: #155724;
+          border: 1px solid #c3e6cb;
+        "
+      >
+        {{ message }}
+      </aside>
+      {% endfor %} {% endif %}
+
+      <section class="tarjeta tarjeta--edicion">
+        <form method="POST" class="formulario-vertical">
+          {% csrf_token %}
+
+          <label for="vendedor_select">Vendedor Responsable:</label>
+          <select name="vendedor" id="vendedor_select" class="input" required>
+            <option value="">-- Seleccione un vendedor --</option>
+            {% for vendedor in vendedores %}
+            <option value="{{ vendedor.id }}">
+              {{ vendedor.nombre_completo }}
+            </option>
+            {% endfor %}
+          </select>
+
+          <label for="producto_select">Producto Vendido:</label>
+          <select name="producto" id="producto_select" class="input" required>
+            <option value="">-- Seleccione un producto --</option>
+            {% for producto in productos %}
+            <option value="{{ producto.id }}">
+              {{ producto.nombre }} — (${{ producto.precio }})
+            </option>
+            {% endfor %}
+          </select>
+
+          <label for="cantidad_input">Cantidad de Unidades:</label>
+          <input
+            type="number"
+            name="cantidad"
+            id="cantidad_input"
+            class="input"
+            min="1"
+            value="1"
+            required
+          />
+
+          <button type="submit" class="btn btn--oscuro btn--bloque">
+            Procesar Venta y Generar Comisión
+          </button>
+        </form>
+
+        <footer class="pie-tarjeta">
+          <p>
+            El sistema aplicará automáticamente las reglas de negocio vigentes.
+          </p>
+        </footer>
+      </section>
+    </main>
+  </body>
+</html>
