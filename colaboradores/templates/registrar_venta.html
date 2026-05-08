@@ -34,16 +34,7 @@
       </header>
 
       {% if messages %} {% for message in messages %}
-      <aside
-        class="alerta alerta--error"
-        style="
-          background-color: #d4edda;
-          color: #155724;
-          border: 1px solid #c3e6cb;
-        "
-      >
-        {{ message }}
-      </aside>
+      <aside class="alerta alerta">{{ message }}</aside>
       {% endfor %} {% endif %}
 
       <section class="tarjeta tarjeta--edicion">
