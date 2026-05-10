@@ -13,9 +13,9 @@ Este proyecto es una aplicación web full-stack desarrollada bajo la arquitectur
 
 El núcleo del sistema es un **Motor de Razonamiento Basado en Casos (CBR)** que evalúa el historial de mora de los clientes para asignar categorías de riesgo dinámicas y restringir operaciones financieras en tiempo real.
 
-## 🚀 Enlace a Producción
+## Enlace a Producción
 El sistema se encuentra desplegado y funcional en la nube a través de Render:
-**👉 [Visitar la Intranet Corporativa](COLOCA_AQUI_EL_LINK_DE_RENDER)**
+**[Visitar la Intranet Corporativa](https://proyectowebcolaboradores.onrender.com)**
 
 ---
 
