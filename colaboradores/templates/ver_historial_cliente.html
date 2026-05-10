@@ -1,0 +1,139 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main>
+  <header class="cabecera-seccion" style="margin-bottom: 30px">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro)">
+      Expediente de Recuperación
+    </h1>
+    <p style="color: var(--color-gris-texto)">
+      Historial detallado de gestiones CBR para el cliente:
+      <strong style="color: var(--color-azul-primario); font-size: 1.1rem"
+        >{{ cliente.nombres }}</strong
+      >
+    </p>
+  </header>
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px">
+      <h2 style="font-size: 1.4rem">Registro de Intervenciones CBR</h2>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <table class="tabla-gestion">
+        <thead>
+          <tr>
+            <th>Fecha</th>
+            <th>Técnica Aplicada</th>
+            <th style="text-align: center">Resultado</th>
+            <th>Observaciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for gestion in historial %}
+          <tr>
+            <td style="color: var(--color-gris-texto)">
+              {{ gestion.fecha_aplicacion|date:"d/m/Y" }}
+            </td>
+            <td>
+              <strong style="color: var(--color-negro)"
+                >{{ gestion.tecnica.nombre }}</strong
+              >
+            </td>
+
+            <td style="text-align: center">
+              {% if gestion.fue_exitosa %}
+              <span
+                style="
+                  background-color: #dcfce7;
+                  color: #166534;
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                  font-weight: bold;
+                  border: 1px solid #86efac;
+                "
+              >
+                ✓ EXITOSA
+              </span>
+              {% else %}
+              <span
+                style="
+                  background-color: var(--color-error-fondo);
+                  color: var(--color-error-texto);
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                  font-weight: bold;
+                  border: 1px solid #fca5a5;
+                "
+              >
+                ✕ FALLIDA
+              </span>
+              {% endif %}
+            </td>
+
+            <td
+              style="
+                font-size: 0.95rem;
+                line-height: 1.4;
+                color: var(--color-texto);
+              "
+            >
+              {{ gestion.observaciones|default:"<span
+                style="color: #94a3b8; font-style: italic"
+                >Sin observaciones registradas</span
+              >"|safe }}
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="4"
+              style="
+                text-align: center;
+                padding: 40px;
+                color: var(--color-gris-texto);
+              "
+            >
+              Este cliente no tiene gestiones previas registradas en el Motor
+              CBR.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 20px 24px;
+        border-radius: 0 0 8px 8px;
+        margin: 20px -24px -24px -24px;
+        border-top: 1px solid var(--color-borde);
+      "
+    >
+      <nav style="display: flex; gap: 15px; justify-content: flex-end">
+        <a
+          href="{% url 'lista_clientes' %}"
+          class="btn btn--advertencia"
+          style="padding: 8px 20px; font-size: 0.9rem"
+        >
+          ← Volver a Clientes
+        </a>
+        <a
+          href="{% url 'registrar_gestion_mora' %}?cliente={{ cliente.id }}"
+          class="btn btn--exito"
+          style="
+            padding: 8px 20px;
+            font-size: 0.9rem;
+            box-shadow: 0 2px 4px rgba(30, 58, 138, 0.2);
+          "
+        >
+          ➕ Nueva Gestión
+        </a>
+      </nav>
+    </footer>
+  </article>
+</main>
+{% endblock %}

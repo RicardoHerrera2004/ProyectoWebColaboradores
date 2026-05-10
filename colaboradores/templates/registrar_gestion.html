@@ -1,0 +1,177 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main
+  style="
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+    min-height: calc(100vh - 150px);
+  "
+>
+  <article
+    class="tarjeta tarjeta--edicion"
+    style="width: 100%; box-sizing: border-box; max-width: 650px"
+  >
+    <header
+      class="tarjeta__cabecera"
+      style="
+        text-align: center;
+        border-bottom: 1px solid var(--color-borde);
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+      "
+    >
+      <h1
+        style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
+      >
+        Registrar Gestión de Mora
+      </h1>
+      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
+        Retroalimente el sistema con el resultado de la estrategia aplicada.
+      </p>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <form method="POST" class="formulario-vertical">
+        {% csrf_token %}
+
+        <h3
+          style="
+            font-size: 1.1rem;
+            color: var(--color-azul-primario);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+          "
+        >
+          1. Datos de la Intervención
+        </h3>
+
+        <section style="margin-bottom: 20px">
+          <label for="{{ form.cliente.id_for_label }}"
+            >Cliente Gestionado:</label
+          >
+          {{ form.cliente }}
+        </section>
+
+        <section style="margin-bottom: 30px">
+          <label for="{{ form.tecnica.id_for_label }}"
+            >Técnica de Mejora Aplicada:</label
+          >
+          {{ form.tecnica }}
+          <small
+            style="
+              display: block;
+              margin-top: 6px;
+              color: var(--color-gris-texto);
+              font-size: 0.85rem;
+            "
+          >
+            ℹ️ Seleccione la estrategia recomendada por el motor o la aplicada
+            manualmente.
+          </small>
+        </section>
+
+        <h3
+          style="
+            font-size: 1.1rem;
+            color: var(--color-azul-primario);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+          "
+        >
+          2. Resultados y Retroalimentación
+        </h3>
+
+        <section
+          style="
+            margin-bottom: 20px;
+            background-color: #f8fafc;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--color-borde);
+          "
+        >
+          <label
+            for="{{ form.fue_exitosa.id_for_label }}"
+            style="
+              display: flex;
+              align-items: center;
+              gap: 12px;
+              cursor: pointer;
+              margin-bottom: 0;
+            "
+          >
+            <div style="transform: scale(1.3)">{{ form.fue_exitosa }}</div>
+            <span style="font-weight: 700; color: var(--color-negro)"
+              >¿La técnica logró regularizar al cliente?</span
+            >
+          </label>
+          <small
+            style="
+              display: block;
+              margin-top: 10px;
+              color: var(--color-gris-texto);
+              font-size: 0.85rem;
+              padding-left: 30px;
+            "
+          >
+            Marque esta casilla únicamente si el cliente normalizó su cartera o
+            realizó el pago tras esta gestión.
+          </small>
+        </section>
+
+        <section style="margin-bottom: 20px">
+          <label for="{{ form.observaciones.id_for_label }}"
+            >Observaciones de la Gestión:</label
+          >
+          {{ form.observaciones }} {% if form.observaciones.errors %}
+          <span
+            style="
+              display: block;
+              margin-top: 6px;
+              color: var(--color-error-texto);
+              font-weight: 600;
+              font-size: 0.85rem;
+            "
+          >
+            ⚠️ {{ form.observaciones.errors|first }}
+          </span>
+          {% endif %}
+        </section>
+
+        <nav style="display: flex; gap: 15px; margin-top: 35px">
+          <a
+            href="{% url 'principal_panel' %}"
+            class="btn btn--advertencia"
+            style="flex: 1; text-align: center"
+          >
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn--exito" style="flex: 2">
+            Registrar y Actualizar Scoring
+          </button>
+        </nav>
+      </form>
+    </section>
+
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        margin: 30px -24px -24px -24px;
+      "
+    >
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
+        <strong style="color: var(--color-azul-primario)"
+          >🧠 Inteligencia CBR:</strong
+        >
+        Cada registro alimenta el historial de patrones. El sistema recalculará
+        automáticamente el nivel de riesgo del cliente tras guardar.
+      </p>
+    </footer>
+  </article>
+</main>
+{% endblock %}

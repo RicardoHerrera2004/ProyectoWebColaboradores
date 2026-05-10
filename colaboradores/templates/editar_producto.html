@@ -1,0 +1,127 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editar Producto | Sistema CBR</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+  </head>
+
+  <body style="background-color: var(--color-fondo)">
+    <header class="header-principal">
+      <nav class="navbar" aria-label="Navegación principal">
+        <h2>Sistema CBR</h2>
+
+        <menu style="margin: 0; padding: 0">
+          <li>
+            <a
+              href="{% url 'panel_principal' %}"
+              style="color: #cbd5e1; font-weight: 500; font-size: 0.95rem"
+            >
+              ← Volver al Tablero
+            </a>
+          </li>
+        </menu>
+      </nav>
+    </header>
+
+    <main
+      class="contenedor"
+      style="
+        display: flex;
+        justify-content: center;
+        padding-top: 60px;
+        min-height: calc(100vh - 150px);
+      "
+    >
+      <article
+        class="tarjeta tarjeta--edicion"
+        style="width: 100%; box-sizing: border-box"
+      >
+        <header
+          class="tarjeta__cabecera"
+          style="
+            text-align: center;
+            border-bottom: 1px solid var(--color-borde);
+            padding-bottom: 20px;
+            margin-bottom: 25px;
+          "
+        >
+          <h1
+            style="
+              font-size: 1.6rem;
+              color: var(--color-negro);
+              margin-bottom: 5px;
+            "
+          >
+            Editar Producto
+          </h1>
+          <p
+            style="
+              color: var(--color-gris-texto);
+              font-size: 0.95rem;
+              margin: 0;
+            "
+          >
+            Modificando el catálogo:
+            <strong style="color: var(--color-azul-primario)"
+              >{{ producto.nombre }}</strong
+            >
+          </p>
+        </header>
+
+        <form method="POST" class="formulario-vertical">
+          {% csrf_token %}
+
+          <section style="margin-bottom: 30px">
+            <label for="nombre">Nombre Comercial:</label>
+            <input
+              type="text"
+              id="nombre"
+              name="nombre"
+              value="{{ producto.nombre }}"
+              required
+            />
+
+            <label for="precio" style="margin-top: 15px"
+              >Precio Base ($):</label
+            >
+            <input
+              type="number"
+              id="precio"
+              name="precio"
+              value="{{ producto.precio }}"
+              step="0.01"
+              required
+            />
+
+            <label for="stock" style="margin-top: 15px"
+              >Stock Disponible (Unidades):</label
+            >
+            <input
+              type="number"
+              id="stock"
+              name="stock"
+              value="{{ producto.stock }}"
+              required
+            />
+          </section>
+
+          <nav style="display: flex; gap: 15px; margin-top: 10px">
+            <a
+              href="{% url 'panel_principal' %}"
+              class="btn btn--advertencia"
+              style="flex: 1; text-align: center"
+            >
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn--exito" style="flex: 2">
+              Guardar Cambios
+            </button>
+          </nav>
+        </form>
+      </article>
+    </main>
+  </body>
+</html>

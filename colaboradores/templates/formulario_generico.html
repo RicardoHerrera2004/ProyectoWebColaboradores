@@ -1,0 +1,86 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main
+  style="
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+    min-height: calc(100vh - 150px);
+  "
+>
+  <article
+    class="tarjeta tarjeta--edicion"
+    style="width: 100%; box-sizing: border-box"
+  >
+    <header
+      class="tarjeta__cabecera"
+      style="
+        text-align: center;
+        border-bottom: 1px solid var(--color-borde);
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+      "
+    >
+      <h1
+        style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
+      >
+        {{ titulo|default:"Gestión de Registro" }}
+      </h1>
+      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
+        Complete los campos a continuación para actualizar el sistema.
+      </p>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <form method="POST" class="formulario-vertical">
+        {% csrf_token %}
+
+        <fieldset style="border: none; padding: 0; margin: 0">
+          {% for field in form %}
+          <section style="margin-bottom: 20px">
+            <label for="{{ field.id_for_label }}">{{ field.label }}:</label>
+
+            {{ field }} {% if field.help_text %}
+            <small
+              style="
+                display: block;
+                margin-top: 6px;
+                color: var(--color-gris-texto);
+                font-size: 0.85rem;
+              "
+            >
+              ℹ️ {{ field.help_text }}
+            </small>
+            {% endif %} {% for error in field.errors %}
+            <span
+              style="
+                display: block;
+                margin-top: 6px;
+                color: var(--color-error-texto);
+                font-weight: 600;
+                font-size: 0.85rem;
+              "
+            >
+              ⚠️ {{ error }}
+            </span>
+            {% endfor %}
+          </section>
+          {% endfor %}
+        </fieldset>
+
+        <nav style="display: flex; gap: 15px; margin-top: 30px">
+          <a
+            href="{{ request.META.HTTP_REFERER|default:'/' }}"
+            class="btn btn--advertencia"
+            style="flex: 1; text-align: center"
+          >
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn--exito" style="flex: 2">
+            Guardar Registro
+          </button>
+        </nav>
+      </form>
+    </section>
+  </article>
+</main>
+{% endblock %}

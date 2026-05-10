@@ -1,88 +1,174 @@
-{% load static %}
-<!doctype html>
-<html lang="es">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Registrar Nueva Venta | Inventario</title>
-    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
-  </head>
-  <body>
-    <header class="header-principal">
-      <nav class="navbar">
-        <h2 class="navbar__brand">Intranet de Ollas</h2>
-        <ul class="navbar__menu">
-          <li>
-            <a href="{% url 'panel' %}" class="btn btn--enlace">
-              ⬅️ Volver al Panel
-            </a>
-          </li>
-          <li>
-            <span>Hola, {{ request.user.username }}</span>
-          </li>
-        </ul>
-      </nav>
+{% extends 'principal_panel.html' %} {% block content %}
+<main
+  style="
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+    min-height: calc(100vh - 150px);
+  "
+>
+  <article
+    class="tarjeta tarjeta--edicion"
+    style="width: 100%; box-sizing: border-box; max-width: 650px"
+  >
+    <header
+      class="tarjeta__cabecera"
+      style="
+        text-align: center;
+        border-bottom: 1px solid var(--color-borde);
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+      "
+    >
+      <h1
+        style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
+      >
+        Registrar Nueva Venta
+      </h1>
+      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
+        Autorización de operaciones controlada por el Motor Analítico de Riesgo.
+      </p>
     </header>
 
-    <main class="contenedor">
-      <header class="cabecera-seccion">
-        <h2>💰 Registro de Nueva Venta</h2>
-        <p>
-          Selecciona los detalles para procesar la transacción y calcular
-          comisiones.
-        </p>
-      </header>
+    <section class="tarjeta__cuerpo">
+      <form method="POST" id="ventaForm" class="formulario-vertical">
+        {% csrf_token %}
 
-      {% if messages %} {% for message in messages %}
-      <aside class="alerta alerta">{{ message }}</aside>
-      {% endfor %} {% endif %}
+        <h3
+          style="
+            font-size: 1.1rem;
+            color: var(--color-azul-primario);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+          "
+        >
+          1. Datos de los Participantes
+        </h3>
 
-      <section class="tarjeta tarjeta--edicion">
-        <form method="POST" class="formulario-vertical">
-          {% csrf_token %}
+        <section style="margin-bottom: 20px">
+          <label for="{{ form.cliente.id_for_label }}"
+            >Seleccionar Cliente:</label
+          >
+          {{ form.cliente }}
+          <small
+            style="
+              display: block;
+              margin-top: 6px;
+              color: var(--color-gris-texto);
+              font-size: 0.85rem;
+            "
+          >
+            ℹ️ El sistema evaluará el riesgo y filtrará los planes permitidos
+            automáticamente al seleccionar.
+          </small>
+        </section>
 
-          <label for="vendedor_select">Vendedor Responsable:</label>
-          <select name="vendedor" id="vendedor_select" class="input" required>
-            <option value="">-- Seleccione un vendedor --</option>
-            {% for vendedor in vendedores %}
-            <option value="{{ vendedor.id }}">
-              {{ vendedor.nombre_completo }}
-            </option>
-            {% endfor %}
-          </select>
+        <section style="margin-bottom: 30px">
+          <label for="{{ form.colaborador.id_for_label }}"
+            >Vendedor Responsable:</label
+          >
+          {{ form.colaborador }}
+        </section>
 
-          <label for="producto_select">Producto Vendido:</label>
-          <select name="producto" id="producto_select" class="input" required>
-            <option value="">-- Seleccione un producto --</option>
-            {% for producto in productos %}
-            <option value="{{ producto.id }}">
-              {{ producto.nombre }} — (${{ producto.precio }})
-            </option>
-            {% endfor %}
-          </select>
+        <h3
+          style="
+            font-size: 1.1rem;
+            color: var(--color-azul-primario);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+          "
+        >
+          2. Parámetros de la Operación
+        </h3>
 
-          <label for="cantidad_input">Cantidad de Unidades:</label>
-          <input
-            type="number"
-            name="cantidad"
-            id="cantidad_input"
-            class="input"
-            min="1"
-            value="1"
-            required
-          />
+        <section style="margin-bottom: 20px">
+          <label for="{{ form.diferido.id_for_label }}"
+            >Plan de Financiamiento Permitido:</label
+          >
+          {{ form.diferido }}
 
-          <button type="submit" class="btn btn--oscuro btn--bloque">
-            Procesar Venta y Generar Comisión
+          <div id="riesgo-alerta"></div>
+        </section>
+
+        <section style="margin-bottom: 20px">
+          <label for="{{ form.estado_pago.id_for_label }}"
+            >Estado Inicial de la Venta:</label
+          >
+          {{ form.estado_pago }}
+        </section>
+
+        <nav style="display: flex; gap: 15px; margin-top: 35px">
+          <a
+            href="{% url 'principal_panel' %}"
+            class="btn btn--advertencia"
+            style="flex: 1; text-align: center"
+          >
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn--exito" style="flex: 2">
+            Autorizar y Registrar Venta
           </button>
-        </form>
+        </nav>
+      </form>
+    </section>
 
-        <footer class="pie-tarjeta">
-          <p>
-            El sistema aplicará automáticamente las reglas de negocio vigentes.
-          </p>
-        </footer>
-      </section>
-    </main>
-  </body>
-</html>
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        margin: 30px -24px -24px -24px;
+      "
+    >
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
+        <strong style="color: var(--color-azul-primario)"
+          >⚡ Endpoints Dinámicos:</strong
+        >
+        Este formulario consume una API interna para garantizar que no se
+        otorguen planes riesgosos a clientes no aptos.
+      </p>
+    </footer>
+  </article>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script>
+  $("#id_cliente").change(function () {
+    const url = "{% url 'ajax_cargar_diferidos' %}";
+    const clienteId = $(this).val();
+
+    // Limpiamos la alerta al cambiar de cliente
+    $("#riesgo-alerta").html("");
+
+    if (clienteId !== "") {
+      $.ajax({
+        url: url,
+        data: { cliente_id: clienteId },
+        success: function (data) {
+          let html_data = '<option value="">---------</option>';
+          data.forEach(function (diferido) {
+            html_data += `<option value="${diferido.id}">${diferido.meses_plazo} meses - Int: ${diferido.porcentaje_interes}%</option>`;
+          });
+
+          $("#id_diferido").html(html_data);
+
+          // Inyectamos la alerta con el diseño premium si el API restringe los planes
+          if (data.length <= 2) {
+            $("#riesgo-alerta").html(`
+              <div style="margin-top: 10px; background-color: var(--color-error-fondo); color: var(--color-error-texto); padding: 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: 1px solid #FCA5A5; display: flex; align-items: center; gap: 8px;">
+                ⚠️ Riesgo Detectado: Planes restringidos por el Core CBR.
+              </div>
+            `);
+          }
+        },
+      });
+    } else {
+      // Si el usuario vuelve a seleccionar "---------", limpiamos el select de diferidos
+      $("#id_diferido").html('<option value="">---------</option>');
+    }
+  });
+</script>
+{% endblock %}

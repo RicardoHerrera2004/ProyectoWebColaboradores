@@ -1,0 +1,133 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main>
+  <header class="cabecera-seccion" style="margin-bottom: 30px">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro)">
+      Configuración: Categorías de Riesgo
+    </h1>
+    <p style="color: var(--color-gris-texto)">
+      Defina los niveles de severidad y códigos que alimentan el motor
+      analítico.
+    </p>
+  </header>
+
+  <nav style="margin-bottom: 25px">
+    <a
+      href="{% url 'crear_categoria' %}"
+      class="btn btn--exito"
+      style="box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2)"
+    >
+      ➕ Definir Nueva Categoría
+    </a>
+  </nav>
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px">
+      <h2 style="font-size: 1.4rem">Repositorio de Niveles de Riesgo</h2>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <table class="tabla-gestion">
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Descripción</th>
+            <th>Factor de Severidad</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for categoria in categorias %}
+          <tr>
+            <td>
+              <span
+                style="
+                  background-color: #f1f5f9;
+                  color: var(--color-negro);
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  font-size: 0.9rem;
+                  font-weight: bold;
+                  border: 1px solid var(--color-borde);
+                  letter-spacing: 0.5px;
+                "
+              >
+                {{ categoria.codigo }}
+              </span>
+            </td>
+            <td>{{ categoria.descripcion }}</td>
+            <td>
+              <strong
+                style="color: var(--color-azul-primario); font-size: 1.1rem"
+                >{{ categoria.factor_severidad }}x</strong
+              >
+            </td>
+            <td>
+              <div style="display: flex; gap: 10px">
+                <a
+                  href="{% url 'editar_categoria' categoria.pk %}"
+                  class="btn btn--advertencia"
+                  style="padding: 6px 12px; font-size: 0.85rem"
+                >
+                  Editar
+                </a>
+                <form
+                  action="{% url 'eliminar_categoria' categoria.pk %}"
+                  method="POST"
+                  onsubmit="
+                    return confirm(
+                      '¿Eliminar esta categoría? Esto podría afectar el scoring de los clientes vinculados.',
+                    );
+                  "
+                  style="margin: 0"
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="btn btn--peligro"
+                    style="padding: 6px 12px; font-size: 0.85rem"
+                  >
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="4"
+              style="
+                text-align: center;
+                padding: 40px;
+                color: var(--color-gris-texto);
+              "
+            >
+              No hay categorías configuradas. El sistema requiere al menos una
+              para operar.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        margin: 20px -24px -24px -24px;
+      "
+    >
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
+        <strong style="color: var(--color-azul-primario)"
+          >ℹ️ Nota Técnica:</strong
+        >
+        El "Factor de Severidad" es un multiplicador directo en la ecuación de
+        riesgo crediticio.
+      </p>
+    </footer>
+  </article>
+</main>
+{% endblock %}

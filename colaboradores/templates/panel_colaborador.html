@@ -1,0 +1,243 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tablero de Salud de Cartera | Colaborador</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+    <style>
+      /* --- Estilos del Dashboard Analítico --- */
+      .metrica {
+        border-left: 5px solid var(--color-azul-primario);
+        text-align: center;
+        padding: 20px;
+      }
+      .metrica--alerta {
+        border-left-color: var(--color-error-texto);
+      }
+      .metrica h3 {
+        font-size: 2.8rem;
+        margin: 10px 0;
+        color: var(--color-azul-nav);
+      }
+      .metrica--alerta h3 {
+        color: var(--color-error-texto);
+      }
+    </style>
+  </head>
+  <body>
+    <header class="header-principal">
+      <nav class="navbar" aria-label="Menú del Colaborador">
+        <h2>Cartera Sanitaria CBR</h2>
+
+        <ul>
+          <li><a href="{% url 'principal_panel' %}">Mi Tablero</a></li>
+          <li><a href="{% url 'registrar_venta' %}">Nueva Venta</a></li>
+          <li>
+            <a href="{% url 'registrar_gestion_mora' %}">Gestión de Cobro</a>
+          </li>
+        </ul>
+
+        <menu>
+          <li>
+            <span style="font-size: 0.95rem; color: #cbd5e1">
+              Gestor:
+              <strong style="color: white"
+                >{{ request.user.username|title }}</strong
+              >
+            </span>
+          </li>
+          <li>
+            <form
+              action="{% url 'vista_logout' %}"
+              method="POST"
+              style="margin: 0"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="btn btn--peligro"
+                style="padding: 6px 14px"
+              >
+                Cerrar Sesión
+              </button>
+            </form>
+          </li>
+        </menu>
+      </nav>
+    </header>
+
+    <main class="contenedor">
+      <header class="cabecera-seccion" style="margin-bottom: 30px">
+        <h1 style="font-size: 1.8rem; color: var(--color-negro)">
+          Tablero de Salud de Cartera
+        </h1>
+        <p style="color: var(--color-gris-texto)">
+          Métricas de rendimiento y recuperación basadas en inteligencia de
+          datos.
+        </p>
+      </header>
+
+      <section class="grid-analitico" style="margin-bottom: 40px">
+        <article class="tarjeta metrica">
+          <p
+            style="
+              font-weight: bold;
+              color: var(--color-gris-texto);
+              text-transform: uppercase;
+              font-size: 0.85rem;
+            "
+          >
+            Índice de Cartera Sana
+          </p>
+          <span class="progreso-circular">85%</span>
+          <p style="font-size: 0.9rem">Porcentaje de clientes al día.</p>
+          <small class="enlace--destacado">↑ 2.4% vs mes anterior</small>
+        </article>
+
+        <article class="tarjeta metrica">
+          <p
+            style="
+              font-weight: bold;
+              color: var(--color-gris-texto);
+              text-transform: uppercase;
+              font-size: 0.85rem;
+            "
+          >
+            Éxito de Recuperación
+          </p>
+          <span class="progreso-circular">78%</span>
+          <p style="font-size: 0.9rem">Efectividad de técnicas CBR.</p>
+        </article>
+
+        <article class="tarjeta metrica metrica--alerta">
+          <p
+            style="
+              font-weight: bold;
+              color: var(--color-error-texto);
+              text-transform: uppercase;
+              font-size: 0.85rem;
+            "
+          >
+            Clientes en Mora Crítica
+          </p>
+          <span
+            class="progreso-circular"
+            style="color: var(--color-error-texto)"
+            >{{ clientes_mora|default:"0" }}</span
+          >
+          <p style="font-size: 0.9rem">Requieren atención inmediata.</p>
+          <footer
+            class="tarjeta__acciones"
+            style="justify-content: center; padding-top: 10px; border: none"
+          >
+            <a
+              href="#lista-mora"
+              class="btn btn--peligro"
+              style="padding: 6px 12px; font-size: 0.85rem"
+              >Gestionar Ahora</a
+            >
+          </footer>
+        </article>
+      </section>
+
+      <section id="lista-mora" class="tarjeta" style="margin-bottom: 40px">
+        <header class="tarjeta__cabecera">
+          <h2 style="font-size: 1.4rem">
+            Clientes que requieren intervención urgente
+          </h2>
+        </header>
+
+        <table class="tabla-gestion">
+          <thead>
+            <tr>
+              <th>Cliente</th>
+              <th>Identificación</th>
+              <th>Incidencias</th>
+              <th>Estado</th>
+              <th>Acción Recomendada</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for venta in lista_ventas_mora %}
+            <tr>
+              <td><strong>{{ venta.cliente.nombres }}</strong></td>
+              <td>{{ venta.cliente.identificacion }}</td>
+              <td>{{ venta.cliente.incidencias_mora_total }}</td>
+              <td>
+                <span
+                  style="
+                    background-color: var(--color-error-fondo);
+                    color: var(--color-error-texto);
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 0.8rem;
+                    font-weight: bold;
+                    border: 1px solid #fca5a5;
+                  "
+                >
+                  CRÍTICO
+                </span>
+              </td>
+              <td>
+                <a
+                  href="{% url 'registrar_gestion_mora' %}?cliente={{ venta.cliente.id }}"
+                  class="btn btn--exito"
+                  style="padding: 6px 12px; font-size: 0.85rem"
+                  >Aplicar CBR</a
+                >
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td
+                colspan="5"
+                style="
+                  text-align: center;
+                  padding: 30px;
+                  color: var(--color-gris-texto);
+                "
+              >
+                Excelente, no tienes clientes en mora crítica por gestionar.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </section>
+
+      <section class="tarjeta tarjeta--oscura">
+        <header
+          class="tarjeta__cabecera"
+          style="border-bottom-color: rgba(255, 255, 255, 0.1)"
+        >
+          <h3 style="font-size: 1.4rem; color: var(--color-oro)">
+            Evolución de Morosidad
+          </h3>
+        </header>
+        <figure class="caja-resaltada">
+          <p style="margin-bottom: 15px">
+            Tendencia de los últimos 6 meses:
+            <strong style="color: var(--color-oro)">En descenso</strong>
+          </p>
+          <progress
+            value="22"
+            max="100"
+            style="width: 100%; height: 10px; border-radius: 5px"
+          ></progress>
+          <figcaption
+            style="margin-top: 15px; font-size: 0.9rem; color: #cbd5e1"
+          >
+            Reducción del 12% en la cartera vencida mediante algoritmos de
+            búsqueda de patrones.
+          </figcaption>
+        </figure>
+      </section>
+    </main>
+
+    <footer class="contenedor pie-tarjeta pie-tarjeta--sin-borde">
+      <p>&copy; 2026 Cookware Corp - Sistema Analítico de Riesgo Crediticio</p>
+    </footer>
+  </body>
+</html>

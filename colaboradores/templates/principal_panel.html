@@ -1,0 +1,389 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Panel Principal | Sistema Analítico CBR</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+    <style>
+      /* --- Estilos del Navbar Desplegable --- */
+      .dropdown-admin {
+        position: relative;
+      }
+      .dropdown-admin summary {
+        cursor: pointer;
+        list-style: none;
+        font-weight: 600;
+        color: #cbd5e1;
+        transition: color 0.2s;
+      }
+      .dropdown-admin summary:hover {
+        color: var(--color-blanco);
+      }
+      .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background-color: var(--color-blanco);
+        border-radius: 8px;
+        padding: 15px;
+        margin-top: 15px;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        min-width: 230px;
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        z-index: 1000;
+      }
+      .dropdown-menu a {
+        color: var(--color-texto) !important;
+        font-size: 0.95rem;
+      }
+      .dropdown-menu a:hover {
+        color: var(--color-azul-primario) !important;
+        transform: translateX(3px);
+      }
+
+      /* --- Estilos del Dashboard Analítico --- */
+      .metrica {
+        border-left: 5px solid var(--color-azul-primario);
+        text-align: center;
+        padding: 20px;
+      }
+      .metrica--alerta {
+        border-left-color: var(--color-error-texto);
+      }
+      .metrica h3 {
+        font-size: 2.8rem;
+        margin: 10px 0;
+        color: var(--color-azul-nav);
+      }
+      .metrica--alerta h3 {
+        color: var(--color-error-texto);
+      }
+
+      /* --- Estilos del Formulario de Productos --- */
+      .form-inline-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+        gap: 15px;
+        align-items: center;
+      }
+      /* Forzamos al input de nombre a ocupar más espacio si hay lugar */
+      .item-expandible {
+        grid-column: span 2;
+      }
+      @media (max-width: 768px) {
+        .item-expandible {
+          grid-column: span 1;
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <header class="header-principal">
+      <nav class="navbar" aria-label="Navegación principal">
+        <h2>Sistema CBR</h2>
+
+        <ul>
+          <li><a href="{% url 'principal_panel' %}">Tablero de Control</a></li>
+          <li>
+            <a href="{% url 'registrar_venta' %}">Control de Riesgo / Vender</a>
+          </li>
+          <li>
+            <a href="{% url 'registrar_gestion_mora' %}"
+              >Registrar Gestión CBR</a
+            >
+          </li>
+
+          {% if request.user.is_staff %}
+          <li>
+            <details class="dropdown-admin">
+              <summary>Panel Administrativo ⚙️</summary>
+              <div class="dropdown-menu">
+                <a
+                  href="{% url 'lista_vendedores' %}"
+                  style="
+                    color: var(--color-azul-primario) !important;
+                    font-weight: bold;
+                    border-bottom: 1px solid var(--color-borde);
+                    padding-bottom: 8px;
+                  "
+                  >Gestión de Colaboradores</a
+                >
+                <a href="{% url 'lista_clientes' %}">Gestión de Clientes</a>
+                <a href="{% url 'lista_diferidos' %}">Parámetros Diferidos</a>
+                <a href="{% url 'lista_categorias' %}">Categorías de Riesgo</a>
+                <a href="{% url 'lista_tecnicas' %}">Motor CBR (Técnicas)</a>
+              </div>
+            </details>
+          </li>
+          {% endif %}
+        </ul>
+
+        <menu>
+          <li>
+            <span style="font-size: 0.95rem; color: #cbd5e1">
+              Hola,
+              <strong style="color: white"
+                >{{ request.user.username|title }}</strong
+              >
+            </span>
+          </li>
+          <li>
+            <form
+              action="{% url 'vista_logout' %}"
+              method="POST"
+              style="margin: 0"
+            >
+              {% csrf_token %}
+              <button
+                type="submit"
+                class="btn btn--peligro"
+                style="padding: 6px 14px"
+              >
+                Cerrar Sesión
+              </button>
+            </form>
+          </li>
+        </menu>
+      </nav>
+    </header>
+
+    <main class="contenedor">
+      {% if messages %} {% for message in messages %}
+      <div
+        class="alerta {% if message.tags == 'error' %}alerta--error{% else %}alerta--exito{% endif %}"
+        style="background-color: var(--color-azul-primario); color: white"
+      >
+        {{ message }}
+      </div>
+      {% endfor %} {% endif %} {% block content %}
+      <section class="dashboard" style="margin-bottom: 40px">
+        <header style="margin-bottom: 20px">
+          <h2 style="font-size: 1.8rem; color: var(--color-negro)">
+            Overview Analítico
+          </h2>
+          <p style="color: var(--color-gris-texto)">
+            Métricas clave y estado general de la cartera de clientes.
+          </p>
+        </header>
+
+        <article class="grid-analitico">
+          {% if request.user.is_staff %}
+          <section class="tarjeta metrica">
+            <p
+              style="
+                font-weight: bold;
+                color: var(--color-gris-texto);
+                text-transform: uppercase;
+                font-size: 0.85rem;
+              "
+            >
+              Total Clientes en Cartera
+            </p>
+            <h3>{{ total_clientes|default:"0" }}</h3>
+          </section>
+          <section class="tarjeta metrica">
+            <p
+              style="
+                font-weight: bold;
+                color: var(--color-gris-texto);
+                text-transform: uppercase;
+                font-size: 0.85rem;
+              "
+            >
+              Volumen de Ventas (Mes)
+            </p>
+            <h3>{{ ventas_mes|default:"0" }}</h3>
+          </section>
+          <section class="tarjeta metrica metrica--alerta">
+            <p
+              style="
+                font-weight: bold;
+                color: var(--color-error-texto);
+                text-transform: uppercase;
+                font-size: 0.85rem;
+              "
+            >
+              Clientes en Mora Crítica
+            </p>
+            <h3>{{ morosidad_global|default:"0" }}</h3>
+            <small
+              class="alerta--error"
+              style="padding: 4px 8px; border-radius: 4px; font-weight: bold"
+              >Requiere atención inmediata</small
+            >
+          </section>
+
+          {% else %}
+          <section class="tarjeta metrica">
+            <p
+              style="
+                font-weight: bold;
+                color: var(--color-gris-texto);
+                text-transform: uppercase;
+                font-size: 0.85rem;
+              "
+            >
+              Mis Ventas Registradas
+            </p>
+            <h3>{{ mis_ventas|default:"0" }}</h3>
+          </section>
+          <section class="tarjeta metrica metrica--alerta">
+            <p
+              style="
+                font-weight: bold;
+                color: var(--color-error-texto);
+                text-transform: uppercase;
+                font-size: 0.85rem;
+              "
+            >
+              Mis Clientes en Mora
+            </p>
+            <h3>{{ clientes_mora|default:"0" }}</h3>
+            <small
+              class="alerta--error"
+              style="padding: 4px 8px; border-radius: 4px; font-weight: bold"
+              >Aplicar técnicas CBR</small
+            >
+          </section>
+          {% endif %}
+        </article>
+      </section>
+
+      {% if request.user.is_staff %}
+      <section class="tarjeta tarjeta--creacion">
+        <header class="tarjeta__cabecera">
+          <h2>➕ Agregar Nuevo Producto al Catálogo</h2>
+        </header>
+
+        <form action="{% url 'crear_producto' %}" method="POST">
+          {% csrf_token %}
+          <fieldset
+            class="form-inline-grid"
+            style="border: none; padding: 0; margin: 0"
+          >
+            <input
+              type="text"
+              name="sku"
+              placeholder="SKU (Ej: OLLA-01)"
+              required
+            />
+            <input
+              type="text"
+              name="nombre"
+              placeholder="Nombre Comercial"
+              required
+              class="item-expandible"
+            />
+            <select name="tipo" required>
+              <option value="OLLA">Olla Individual</option>
+              <option value="SET">Set Completo</option>
+              <option value="REPUESTO">Repuesto</option>
+            </select>
+            <input
+              type="number"
+              name="precio"
+              placeholder="Precio ($)"
+              step="0.01"
+              required
+            />
+            <input type="number" name="stock" placeholder="Stock" required />
+            <button type="submit" class="btn btn--exito" style="height: 100%">
+              Guardar Producto
+            </button>
+          </fieldset>
+        </form>
+      </section>
+      {% endif %}
+
+      <section class="catalogo">
+        <header style="margin-bottom: 20px">
+          <h2 style="font-size: 1.8rem; color: var(--color-negro)">
+            Catálogo de Productos Activos
+          </h2>
+        </header>
+
+        <ul class="grid-productos">
+          {% for producto in productos %}
+          <li class="tarjeta">
+            <article
+              style="display: flex; flex-direction: column; height: 100%"
+            >
+              <header class="tarjeta__cabecera">
+                <h3 style="margin-bottom: 5px; font-size: 1.2rem">
+                  {{ producto.nombre }}
+                </h3>
+                <span
+                  style="
+                    background-color: #f1f5f9;
+                    color: var(--color-gris-texto);
+                    padding: 4px 8px;
+                    border-radius: 4px;
+                    font-size: 0.8rem;
+                    font-weight: bold;
+                  "
+                >
+                  {{ producto.get_tipo_display }} | SKU: {{ producto.codigo_sku
+                  }}
+                </span>
+              </header>
+
+              <section class="tarjeta__cuerpo" style="margin-top: 15px">
+                <p><strong>Precio Base:</strong> ${{ producto.precio }}</p>
+                <p>
+                  <strong>Stock disponible:</strong> {{ producto.stock }}
+                  unidades
+                </p>
+              </section>
+
+              {% if request.user.is_staff %}
+              <footer class="tarjeta__acciones" style="margin-top: auto">
+                <a
+                  href="{% url 'editar_producto' producto.id %}"
+                  class="btn btn--advertencia"
+                  style="flex: 1"
+                  >Editar</a
+                >
+                <form
+                  action="{% url 'eliminar_producto' producto.id %}"
+                  method="POST"
+                  onsubmit="
+                    return confirm(
+                      '¿Seguro que deseas eliminar este producto del catálogo?',
+                    );
+                  "
+                  style="flex: 1; display: flex"
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="btn btn--peligro"
+                    style="width: 100%"
+                  >
+                    Eliminar
+                  </button>
+                </form>
+              </footer>
+              {% endif %}
+            </article>
+          </li>
+          {% empty %}
+          <li
+            class="tarjeta"
+            style="grid-column: 1 / -1; text-align: center; padding: 40px"
+          >
+            <p style="color: var(--color-gris-texto); font-size: 1.1rem">
+              No hay productos registrados aún en el sistema.
+            </p>
+          </li>
+          {% endfor %}
+        </ul>
+      </section>
+      {% endblock %}
+    </main>
+  </body>
+</html>

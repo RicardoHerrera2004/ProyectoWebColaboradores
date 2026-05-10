@@ -1,0 +1,96 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main>
+  <header class="cabecera-seccion" style="margin-bottom: 30px">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro)">
+      Historial de Transacciones
+    </h1>
+    <p style="color: var(--color-gris-texto)">
+      Registro detallado de ventas y estados de financiamiento de la cartera.
+    </p>
+  </header>
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px">
+      <h2 style="font-size: 1.4rem">Ventas Realizadas</h2>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <table class="tabla-gestion">
+        <thead>
+          <tr>
+            <th>ID Venta</th>
+            <th>Fecha</th>
+            <th>Cliente</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for venta in ventas %}
+          <tr>
+            <td><strong>#{{ venta.id }}</strong></td>
+            <td>{{ venta.fecha|date:"d/m/Y" }}</td>
+            <td>{{ venta.cliente.nombres }}</td>
+            <td><strong>${{ venta.total }}</strong></td>
+            <td>
+              {% if venta.estado_pago == 'EN_MORA' %}
+              <span
+                style="
+                  background-color: var(--color-error-fondo);
+                  color: var(--color-error-texto);
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                  font-weight: bold;
+                  border: 1px solid #fca5a5;
+                "
+              >
+                {{ venta.get_estado_pago_display|upper }}
+              </span>
+              {% else %}
+              <span
+                style="
+                  background-color: #e0f2fe;
+                  color: var(--color-azul-primario);
+                  padding: 4px 8px;
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                  font-weight: bold;
+                  border: 1px solid #bae6fd;
+                "
+              >
+                {{ venta.get_estado_pago_display|upper }}
+              </span>
+              {% endif %}
+            </td>
+            <td>
+              <a
+                href="{% url 'ver_historial_cliente' venta.cliente.id %}"
+                class="btn btn--advertencia"
+                style="padding: 4px 10px; font-size: 0.8rem"
+              >
+                Ver Expediente
+              </a>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="6"
+              style="
+                text-align: center;
+                padding: 40px;
+                color: var(--color-gris-texto);
+              "
+            >
+              No se registran ventas en el periodo actual.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+  </article>
+</main>
+{% endblock %}

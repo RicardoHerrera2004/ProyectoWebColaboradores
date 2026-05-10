@@ -1,0 +1,163 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main>
+  <header class="cabecera-seccion" style="margin-bottom: 30px">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro)">
+      Configuración de Planes Diferidos
+    </h1>
+    <p style="color: var(--color-gris-texto)">
+      Administre los plazos de financiamiento y las tasas de interés autorizadas
+      para la comercialización.
+    </p>
+  </header>
+
+  <nav style="margin-bottom: 25px">
+    <a
+      href="{% url 'crear_diferido' %}"
+      class="btn btn--exito"
+      style="box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2)"
+    >
+      ➕ Crear Nuevo Plan Diferido
+    </a>
+  </nav>
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px">
+      <h2 style="font-size: 1.4rem">Catálogo de Financiamiento Activo</h2>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <table class="tabla-gestion">
+        <thead>
+          <tr>
+            <th>Plazo (Meses)</th>
+            <th>Interés Anual (%)</th>
+            <th style="text-align: center">Requiere Entrada</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for diferido in diferidos %}
+          <tr>
+            <td>
+              <span
+                style="
+                  font-weight: 700;
+                  color: var(--color-negro);
+                  font-size: 1rem;
+                "
+              >
+                {{ diferido.meses_plazo }} meses
+              </span>
+            </td>
+            <td>
+              <strong
+                style="
+                  color: var(--color-azul-primario);
+                  background-color: #e0f2fe;
+                  padding: 4px 10px;
+                  border-radius: 20px;
+                "
+              >
+                {{ diferido.porcentaje_interes }}%
+              </strong>
+            </td>
+            <td style="text-align: center">
+              {% if diferido.requiere_entrada %}
+              <span
+                style="
+                  background-color: var(--color-azul-nav);
+                  color: var(--color-blanco);
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  font-size: 0.75rem;
+                  font-weight: bold;
+                  letter-spacing: 0.5px;
+                "
+              >
+                OBLIGATORIA
+              </span>
+              {% else %}
+              <span
+                style="
+                  background-color: #f1f5f9;
+                  color: var(--color-gris-texto);
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  font-size: 0.75rem;
+                  font-weight: 500;
+                  border: 1px solid var(--color-borde);
+                "
+              >
+                No requiere
+              </span>
+              {% endif %}
+            </td>
+            <td>
+              <div style="display: flex; gap: 10px">
+                <a
+                  href="{% url 'editar_diferido' diferido.pk %}"
+                  class="btn btn--advertencia"
+                  style="padding: 6px 12px; font-size: 0.85rem"
+                >
+                  Editar
+                </a>
+                <form
+                  action="{% url 'eliminar_diferido' diferido.pk %}"
+                  method="POST"
+                  onsubmit="
+                    return confirm(
+                      '¿Está seguro de eliminar este plan de financiamiento?',
+                    );
+                  "
+                  style="margin: 0"
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="btn btn--peligro"
+                    style="padding: 6px 12px; font-size: 0.85rem"
+                  >
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="4"
+              style="
+                text-align: center;
+                padding: 40px;
+                color: var(--color-gris-texto);
+              "
+            >
+              No existen planes diferidos configurados en el sistema.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        margin: 20px -24px -24px -24px;
+      "
+    >
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
+        <strong style="color: var(--color-azul-primario)"
+          >⚙️ Lógica del Negocio:</strong
+        >
+        Los planes con "Entrada Obligatoria" son filtrados automáticamente por
+        el motor para clientes con perfiles de riesgo específicos.
+      </p>
+    </footer>
+  </article>
+</main>
+{% endblock %}

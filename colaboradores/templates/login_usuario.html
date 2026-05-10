@@ -1,0 +1,65 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Acceso al Sistema | Intranet</title>
+    <link rel="stylesheet" href="{% static 'css/panel.css' %}" />
+  </head>
+
+  <body class="pantalla-completa">
+    <main>
+      <article class="tarjeta tarjeta--login">
+        <header class="tarjeta__cabecera">
+          <h1 style="font-size: 1.6rem; margin-bottom: 5px">
+            Intranet Corporativa
+          </h1>
+          <p style="color: var(--color-gris-texto); font-size: 0.9rem">
+            Sistema de Gestión de Riesgo y Recuperación de Cartera
+          </p>
+        </header>
+
+        <form
+          method="POST"
+          action="{% url 'login_usuario' %}"
+          class="formulario-vertical"
+        >
+          {% csrf_token %} {% if form.non_field_errors %}
+          <aside class="alerta alerta--error">
+            <ul style="list-style: none; padding: 0; margin: 0">
+              {% for error in form.non_field_errors %}
+              <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </aside>
+          {% endif %}
+
+          <section style="text-align: left; margin-bottom: 20px">
+            <label for="{{ form.username.id_for_label }}"
+              >Usuario Corporativo:</label
+            >
+            {{ form.username }}
+
+            <label
+              for="{{ form.password.id_for_label }}"
+              style="margin-top: 15px"
+              >Contraseña:</label
+            >
+            {{ form.password }}
+          </section>
+
+          <nav>
+            <button type="submit" class="btn btn--exito btn--bloque">
+              Ingresar al Sistema
+            </button>
+          </nav>
+        </form>
+
+        <footer class="pie-tarjeta pie-tarjeta--sin-borde">
+          <p>Acceso restringido únicamente a personal autorizado.</p>
+        </footer>
+      </article>
+    </main>
+  </body>
+</html>

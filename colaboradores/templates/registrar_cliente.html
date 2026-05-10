@@ -1,0 +1,85 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main class="contenedor">
+  {% if messages %}
+  <section aria-label="Notificaciones del sistema">
+    {% for message in messages %}
+    <p
+      class="alerta {% if message.tags == 'error' %}alerta--error{% else %}btn--exito{% endif %}"
+    >
+      {{ message }}
+    </p>
+    {% endfor %}
+  </section>
+  {% endif %}
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera">
+      <h2>Registro de Nuevo Cliente</h2>
+      <p>Ingrese los datos para la evaluación inicial de riesgo crediticio.</p>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <form method="POST" class="formulario-vertical">
+        {% csrf_token %}
+
+        <fieldset>
+          <legend>Información Identitaria</legend>
+
+          <p>
+            <label for="{{ form.identificacion.id_for_label }}"
+              >Número de Cédula (Dato Sensible):</label
+            >
+            {{ form.identificacion }} {% if form.identificacion.errors %}
+            <span class="alerta--error"
+              >{{ form.identificacion.errors|first }}</span
+            >
+            {% endif %}
+            <small
+              >La cédula será validada mediante algoritmos de provincia y
+              longitud en el servidor.</small
+            >
+          </p>
+
+          <p>
+            <label for="{{ form.nombres.id_for_label }}"
+              >Nombres y Apellidos Completos:</label
+            >
+            {{ form.nombres }}
+          </p>
+        </fieldset>
+
+        <fieldset>
+          <legend>Clasificación de Cartera</legend>
+
+          <p>
+            <label for="{{ form.categoria_riesgo.id_for_label }}"
+              >Categoría de Riesgo Inicial:</label
+            >
+            {{ form.categoria_riesgo }}
+            <small
+              >Esta categoría condicionará los planes diferidos disponibles en
+              el módulo de ventas.</small
+            >
+          </p>
+        </fieldset>
+
+        <footer class="tarjeta__acciones pie-tarjeta pie-tarjeta--sin-borde">
+          <a href="{% url 'principal_panel' %}" class="btn btn--advertencia"
+            >Regresar al Panel</a
+          >
+          <button type="submit" class="btn btn--exito">
+            Registrar Cliente en el Core
+          </button>
+        </footer>
+      </form>
+    </section>
+
+    <footer class="pie-tarjeta">
+      <p>
+        Nota: Al registrar al cliente, el sistema habilita el seguimiento de
+        incidencias de mora total.
+      </p>
+    </footer>
+  </article>
+</main>
+{% endblock %}

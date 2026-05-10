@@ -1,4 +1,5 @@
 venv_proyecto/
+mi_entorno/
 __pycache__/
 db.sqlite3
 .env

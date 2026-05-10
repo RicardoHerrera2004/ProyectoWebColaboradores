@@ -3,9 +3,7 @@ from django.contrib.auth.models import User
 from decimal import Decimal
 from django.core.validators import MinValueValidator
 
-# ==========================================
-# 1. MODELOS DE ADMINISTRACIÓN Y CORE CBR (NUEVOS)
-# ==========================================
+# MODELOS DE ADMINISTRACIÓN Y CORE CBR 
 
 class CategoriaRiesgo(models.Model):
     codigo = models.CharField(max_length=20, unique=True, help_text="Ej: ACEPTABLE, MEDIO, CRITICO")
@@ -71,9 +69,7 @@ class HistorialGestion(models.Model):
         return f"Gestión a {self.cliente.nombres} - Éxito: {self.fue_exitosa}"
 
 
-# ==========================================
-# 2. TUS MODELOS ORIGINALES (CON LIGEROS AJUSTES)
-# ==========================================
+# MODELOS ORIGINALES DE LOS COLABORADORES
 
 class Producto(models.Model):
     TIPOS_PRODUCTO = [
@@ -89,13 +85,6 @@ class Producto(models.Model):
 
     def __str__(self):
         return f"{self.codigo_sku} - {self.nombre}"
-
-class UsuarioVIP(models.Model):
-    username = models.CharField(max_length=50, unique=True)
-    password = models.CharField(max_length=255) 
-
-    def __str__(self):
-        return self.username
     
 class Vendedor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -111,69 +100,42 @@ class Vendedor(models.Model):
     def __str__(self):
         return self.nombre_completo
     
-class ReglaNegocio(models.Model):
-    porcentaje = models.DecimalField(
-        max_digits=5, 
-        decimal_places=2, 
-        validators=[MinValueValidator(Decimal('0.01'))],
-        help_text="Porcentaje de descuento aplicado a las ventas (ej: 10.00 para el 10%)"
-    )
-    monto_minimo = models.DecimalField(
-        max_digits=10,
-        decimal_places=2,
-        validators=[MinValueValidator(Decimal('0.01'))],
-        help_text="Monto mínimo de venta para aplicar el descuento"
-    )
-    fecha_creacion = models.DateTimeField(auto_now_add=True)
-    activa = models.BooleanField(default=True)
-    
-    class Meta:
-        verbose_name = 'Regla de Negocio'
-        verbose_name_plural = 'Reglas de Negocio'
-        ordering = ['monto_minimo']
-        
-    def __str__(self):
-        return f"Regla {self.id}: {self.porcentaje}% descuento para ventas >= {self.monto_minimo}"
-    
-    def porcentaje_decimal(self):
-        return self.porcentaje / Decimal('100')
-    
 class Venta(models.Model):
-    vendedor = models.ForeignKey(Vendedor, on_delete=models.CASCADE, related_name='ventas')
-    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='ventas')
-    # Opcional: podrías relacionar la venta con el Cliente y el Diferido según tu diagrama PDF
-    cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, null=True, blank=True)
+    # Opciones predefinidas para el estado de la venta, evitando inputs manuales
+    ESTADOS_PAGO = [
+        ('AL_DIA', 'Al Día'),
+        ('EN_MORA', 'En Mora (Riesgo)'),
+        ('CANCELADO', 'Pagado en su totalidad'),
+    ]
+    
+    colaborador = models.ForeignKey(Vendedor, on_delete=models.PROTECT, related_name='ventas_realizadas')
+    cliente = models.ForeignKey(Cliente, on_delete=models.PROTECT, related_name='compras_realizadas')
+    
+    # El diferido puede ser nulo si la venta es al contado (Riesgo Crítico)
     diferido = models.ForeignKey(Diferido, on_delete=models.PROTECT, null=True, blank=True)
     
-    cantidad = models.IntegerField()
-    monto = models.DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(Decimal('0.01'))])
-    fecha_venta = models.DateTimeField(auto_now_add=True)
-    fecha_modificacion = models.DateTimeField(auto_now=True)
+    fecha_emision = models.DateTimeField(auto_now_add=True)
+    total_pagar = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    estado_pago = models.CharField(max_length=20, choices=ESTADOS_PAGO, default='AL_DIA')
     
     class Meta:
         verbose_name = 'Venta'
         verbose_name_plural = 'Ventas'
-        ordering = ['-fecha_venta']
+        ordering = ['-fecha_emision']
     
     def __str__(self):
-        return f"Venta {self.id} - {self.producto.nombre} x{self.cantidad} por {self.vendedor.nombre_completo}"
+        return f"Venta #{self.id} - Cliente: {self.cliente.nombres} - Total: ${self.total_pagar}"
+
+class DetalleVenta(models.Model):
+    venta = models.ForeignKey(Venta, on_delete=models.CASCADE, related_name='detalles')
+    producto = models.ForeignKey(Producto, on_delete=models.PROTECT)
     
-    def calcular_comision(self):
-        reglas_activas = ReglaNegocio.objects.filter(activa=True, monto_minimo__lte=self.monto).order_by('-monto_minimo')
-        if reglas_activas.exists():
-            regla_aplicable = reglas_activas.first()
-            return self.monto * regla_aplicable.porcentaje_decimal()
-        return Decimal('0.00')
-    
-class ComisionCalculada(models.Model):
-    venta = models.OneToOneField(Venta, on_delete=models.CASCADE, related_name='comision')
-    monto_comision = models.DecimalField(max_digits=10, decimal_places=2)
-    fecha_calculo = models.DateTimeField(auto_now_add=True)
+    cantidad = models.IntegerField(validators=[MinValueValidator(1)])
+    precio_unitario = models.DecimalField(max_digits=10, decimal_places=2)
     
     class Meta:
-        verbose_name = 'Comisión Calculada'
-        verbose_name_plural = 'Comisiones Calculadas'
-        ordering = ['-fecha_calculo']
-    
+        verbose_name = 'Detalle de Venta'
+        verbose_name_plural = 'Detalles de Ventas'
+        
     def __str__(self):
-        return f"Comisión para Venta {self.venta.id}: {self.monto_comision}"
+        return f"{self.cantidad}x {self.producto.nombre} (Venta #{self.venta.id})"

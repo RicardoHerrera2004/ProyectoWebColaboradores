@@ -1,0 +1,177 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main>
+  <header class="cabecera-seccion" style="margin-bottom: 30px">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro)">
+      Gestión del Portafolio de Clientes
+    </h1>
+    <p style="color: var(--color-gris-texto)">
+      Administre la información de los compradores y supervise su estatus en el
+      Motor Analítico.
+    </p>
+  </header>
+
+  <nav style="margin-bottom: 25px">
+    <a
+      href="{% url 'registrar_cliente_admin' %}"
+      class="btn btn--exito"
+      style="box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2)"
+    >
+      ➕ Registrar Nuevo Cliente
+    </a>
+  </nav>
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px">
+      <h2 style="font-size: 1.4rem">
+        Base de Datos de Clientes y Niveles de Riesgo
+      </h2>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <table class="tabla-gestion">
+        <thead>
+          <tr>
+            <th>Identificación</th>
+            <th>Nombres y Apellidos</th>
+            <th style="text-align: center">Incidencias</th>
+            <th>Categoría de Riesgo</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for cliente in clientes %}
+          <tr>
+            <td><strong>{{ cliente.identificacion }}</strong></td>
+            <td>{{ cliente.nombres }}</td>
+
+            <td style="text-align: center">
+              {% if cliente.incidencias_mora_total > 3 %}
+              <span
+                style="
+                  background-color: var(--color-error-fondo);
+                  color: var(--color-error-texto);
+                  padding: 4px 8px;
+                  border-radius: 20px;
+                  font-weight: bold;
+                  font-size: 0.85rem;
+                "
+              >
+                {{ cliente.incidencias_mora_total }} ⚠️
+              </span>
+              {% else %}
+              <span style="font-weight: 600; color: var(--color-texto)">
+                {{ cliente.incidencias_mora_total }}
+              </span>
+              {% endif %}
+            </td>
+
+            <td>
+              {% if cliente.categoria_riesgo.codigo == 'CRITICO' %}
+              <span
+                style="
+                  background-color: var(--color-error-fondo);
+                  color: var(--color-error-texto);
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                  font-weight: bold;
+                  border: 1px solid #fca5a5;
+                "
+              >
+                {{ cliente.categoria_riesgo.codigo }}
+              </span>
+              {% else %}
+              <span
+                style="
+                  background-color: #f1f5f9;
+                  color: var(--color-gris-texto);
+                  padding: 4px 10px;
+                  border-radius: 4px;
+                  font-size: 0.8rem;
+                  font-weight: bold;
+                  border: 1px solid var(--color-borde);
+                "
+              >
+                {{ cliente.categoria_riesgo.codigo|default:"SIN ASIGNAR" }}
+              </span>
+              {% endif %}
+            </td>
+
+            <td>
+              <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                <a
+                  href="{% url 'registrar_gestion_mora' %}?cliente={{ cliente.id }}"
+                  class="btn btn--exito"
+                  title="Aplicar Técnica de Recuperación"
+                  style="padding: 6px 12px; font-size: 0.8rem"
+                >
+                  Gestionar
+                </a>
+
+                <a
+                  href="{% url 'editar_cliente' cliente.pk %}"
+                  class="btn btn--advertencia"
+                  style="padding: 6px 12px; font-size: 0.8rem"
+                >
+                  Editar
+                </a>
+
+                {% if request.user.is_staff %}
+                <form
+                  action="{% url 'eliminar_cliente' cliente.pk %}"
+                  method="POST"
+                  style="margin: 0"
+                  onsubmit="
+                    return confirm(
+                      '¿Está seguro de eliminar este cliente? Se borrará todo su historial de gestión.',
+                    );
+                  "
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="btn btn--peligro"
+                    style="padding: 6px 12px; font-size: 0.8rem"
+                  >
+                    Eliminar
+                  </button>
+                </form>
+                {% endif %}
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="5"
+              style="
+                text-align: center;
+                padding: 40px;
+                color: var(--color-gris-texto);
+              "
+            >
+              No se han encontrado clientes registrados en el sistema.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        margin: 20px -24px -24px -24px;
+      "
+    >
+      <p style="margin: 0; color: var(--color-gris-texto); font-size: 0.9rem">
+        Mostrando el listado completo de clientes activos en la ciudad de Quito
+        y regiones aledañas.
+      </p>
+    </footer>
+  </article>
+</main>
+{% endblock %}

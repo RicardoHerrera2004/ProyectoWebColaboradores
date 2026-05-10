@@ -1,0 +1,122 @@
+{% extends 'principal_panel.html' %} {% block content %}
+<main>
+  <header class="cabecera-seccion" style="margin-bottom: 30px">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro)">
+      Repositorio de Técnicas CBR
+    </h1>
+    <p style="color: var(--color-gris-texto)">
+      Administre las estrategias de gestión de cobro que el motor analítico
+      recomendará a los colaboradores.
+    </p>
+  </header>
+
+  <nav style="margin-bottom: 25px">
+    <a
+      href="{% url 'crear_tecnica' %}"
+      class="btn btn--exito"
+      style="box-shadow: 0 4px 6px rgba(30, 58, 138, 0.2)"
+    >
+      ➕ Agregar Nueva Técnica
+    </a>
+  </nav>
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px">
+      <h2 style="font-size: 1.4rem">Estrategias de Recuperación de Cartera</h2>
+    </header>
+
+    <section class="tarjeta__cuerpo">
+      <table class="tabla-gestion">
+        <thead>
+          <tr>
+            <th>Nombre de la Estrategia</th>
+            <th>Descripción Técnica</th>
+            <th>Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for tecnica in tecnicas %}
+          <tr>
+            <td style="width: 25%">
+              <span
+                style="
+                  font-weight: 700;
+                  color: var(--color-azul-primario);
+                  font-size: 1rem;
+                "
+              >
+                {{ tecnica.nombre }}
+              </span>
+            </td>
+            <td style="color: var(--color-texto); line-height: 1.5">
+              {{ tecnica.descripcion }}
+            </td>
+            <td style="width: 20%">
+              <div style="display: flex; gap: 10px">
+                <a
+                  href="{% url 'editar_tecnica' tecnica.pk %}"
+                  class="btn btn--advertencia"
+                  style="padding: 6px 12px; font-size: 0.85rem"
+                >
+                  Editar
+                </a>
+                <form
+                  action="{% url 'eliminar_tecnica' tecnica.pk %}"
+                  method="POST"
+                  style="margin: 0"
+                  onsubmit="
+                    return confirm(
+                      '¿Está seguro de eliminar esta técnica? Si existen historiales asociados, el sistema podría bloquear esta acción por integridad referencial.',
+                    );
+                  "
+                >
+                  {% csrf_token %}
+                  <button
+                    type="submit"
+                    class="btn btn--peligro"
+                    style="padding: 6px 12px; font-size: 0.85rem"
+                  >
+                    Eliminar
+                  </button>
+                </form>
+              </div>
+            </td>
+          </tr>
+          {% empty %}
+          <tr>
+            <td
+              colspan="3"
+              style="
+                text-align: center;
+                padding: 40px;
+                color: var(--color-error-texto);
+                font-weight: 500;
+              "
+            >
+              ⚠️ El repositorio de técnicas está vacío. El motor CBR no podrá
+              generar recomendaciones.
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </section>
+
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        margin: 20px -24px -24px -24px;
+      "
+    >
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
+        <strong style="color: var(--color-azul-primario)">🧠 Nota CBR:</strong>
+        Cada técnica listada aquí será evaluada dinámicamente según su tasa de
+        éxito histórica al momento de recomendarse.
+      </p>
+    </footer>
+  </article>
+</main>
+{% endblock %}

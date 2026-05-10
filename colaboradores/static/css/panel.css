@@ -1,29 +1,36 @@
-/*VARIABLES DE TEMA Y COLORES*/
+/* =========================================================
+   VARIABLES DE TEMA Y COLORES (Estilo Corporativo Premium)
+   ========================================================= */
 :root {
-    --color-fondo: #f4f7f6;      
-    --color-blanco: #ffffff;
-    --color-negro: #1a1a1a;      
-    --color-texto: #333333;
+    /* Fondos y Textos Base */
+    --color-fondo: #F0F4F8;      
+    --color-blanco: #FFFFFF;
+    --color-negro: #0F172A; /* Un negro azulado muy oscuro y elegante */     
+    --color-texto: #334155;
     
-    --color-azul-nav: #0b1c2c;   
-    --color-azul-primario: #0056b3; 
-    --color-azul-hover: #004494;
+    /* Paleta Azul Oscuro (Confianza y Seguridad) */
+    --color-azul-nav: #0B132B; /* Azul noche casi negro para la cabecera */  
+    --color-azul-primario: #1E3A8A; /* Azul rey profundo para botones principales */
+    --color-azul-hover: #1E40AF;
     
-    --color-borde: #e0e0e0;
- 
-    --color-oro: gold;
-    --color-error-fondo: #fadbd8;
-    --color-error-texto: #e74c3c;
-    --color-gris-texto: #7f8c8d;
-    --color-fondo-transparente: rgba(0, 0, 0, 0.2);
+    /* Detalles y Alertas */
+    --color-borde: #E2E8F0;
+    --color-oro: #D4AF37; /* Oro metálico refinado, mejor que 'gold' estándar */
+    --color-error-fondo: #FEE2E2;
+    --color-error-texto: #B91C1C;
+    --color-gris-texto: #64748B;
+    --color-fondo-transparente: rgba(255, 255, 255, 0.08);
 }
 
-/*RESETEO Y ESTILOS BASE*/
+/* =========================================================
+   RESETEO Y ESTILOS BASE
+   ========================================================= */
 body { 
-    font-family: 'Segoe UI'; 
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
     margin: 0; 
     background-color: var(--color-fondo);
     color: var(--color-texto);
+    line-height: 1.6;
 }
 
 ul, menu {
@@ -32,14 +39,19 @@ ul, menu {
     margin: 0;
 }
 
-a { text-decoration: none; }
-
+a { text-decoration: none; transition: color 0.2s; }
 h1, h2, h3, p { margin-top: 0; }
 
-/*NAVEGACIÓN Y HEADER*/
+/* =========================================================
+   NAVEGACIÓN Y HEADER
+   ========================================================= */
 .header-principal {
     background-color: var(--color-azul-nav);
     color: var(--color-blanco);
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); /* Sombra para separar el header del fondo */
+    position: sticky;
+    top: 0;
+    z-index: 1000;
 }
 
 .navbar {
@@ -51,52 +63,69 @@ h1, h2, h3, p { margin-top: 0; }
     margin: 0 auto;
 }
 
-.navbar__brand {
+.navbar h2 {
     font-size: 1.5rem;
     margin: 0;
     letter-spacing: 0.5px;
+    font-weight: 700;
 }
 
-.navbar__menu {
+.navbar ul {
+    display: flex;
+    gap: 25px;
+}
+
+.navbar ul li a {
+    color: #CBD5E1;
+    font-weight: 500;
+}
+
+.navbar ul li a:hover {
+    color: var(--color-blanco);
+}
+
+.navbar menu {
     display: flex;
     align-items: center;
     gap: 20px; 
 }
 
-.navbar__menu p {
-    margin: 0;
-    font-weight: 500;
-}
-
-/*ESTRUCTURA PRINCIPAL (Main)*/
+/* =========================================================
+   ESTRUCTURA PRINCIPAL (Main)
+   ========================================================= */
 .contenedor { 
-    padding: 30px; 
+    padding: 40px 30px; 
     max-width: 1400px;
     margin: 0 auto;
 }
 
-/*TARJETAS Y GRID (Catálogo)*/
+/* =========================================================
+   TARJETAS Y GRID
+   ========================================================= */
 .tarjeta {
     background: var(--color-blanco); 
-    padding: 20px; 
-    border-radius: 8px;
+    padding: 24px; 
+    border-radius: 12px; /* Bordes un poco más suaves */
     display: flex;
     flex-direction: column; 
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03); /* Sombra moderna */
+    border: 1px solid rgba(0,0,0,0.05);
 }
 
-.tarjeta--creacion {
-    margin-bottom: 40px;
-}
+.tarjeta--creacion { margin-bottom: 40px; }
 
-.grid-productos {
+.grid-productos, .grid-analitico {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
+    gap: 24px;
     margin-top: 20px;
 }
 
-.tarjeta__cabecera h3 {
+.tarjeta__cabecera h2, .tarjeta__cabecera h3 {
     color: var(--color-negro);
+    border-bottom: 2px solid var(--color-fondo);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
 }
 
 .tarjeta__cuerpo {
@@ -106,226 +135,197 @@ h1, h2, h3, p { margin-top: 0; }
 
 .tarjeta__acciones {
     display: flex;
-    gap: 10px;
-    padding-top: 15px;
+    gap: 12px;
+    padding-top: 20px;
+    border-top: 1px solid var(--color-fondo);
 }
 
-/*FORMULARIOS E INPUTS*/
-.formulario-producto {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
+/* =========================================================
+   TABLAS (Estilo Dashboard Financiero)
+   ========================================================= */
+.tabla-gestion {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 15px;
+    font-size: 0.95rem;
+}
+
+.tabla-gestion th, .tabla-gestion td {
+    padding: 14px;
+    text-align: left;
+    border-bottom: 1px solid var(--color-borde);
+}
+
+.tabla-gestion th {
+    background-color: #F8FAFC;
+    color: var(--color-negro);
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+
+.tabla-gestion tr:hover td {
+    background-color: #F1F5F9; /* Efecto hover en las filas de la tabla */
+}
+
+/* =========================================================
+   FORMULARIOS E INPUTS
+   ========================================================= */
+input, select, textarea {
+    padding: 12px 14px;
+    border: 1px solid var(--color-borde);
+    border-radius: 6px;
+    font-family: inherit;
+    font-size: 1rem;
+    transition: border-color 0.3s, box-shadow 0.3s;
+    background-color: #FAFAFA;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--color-azul-primario);
+    box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15); /* Anillo de foco azul */
+    background-color: var(--color-blanco);
+}
+
+.formulario-django p, .formulario-vertical p {
+    text-align: left; 
+    margin-bottom: 15px;
+}
+
+.formulario-django label, .formulario-vertical label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--color-negro);
+    font-size: 0.95rem;
+}
+
+/* =========================================================
+   BOTONES SISTEMA DE DISEÑO
+   ========================================================= */
+.btn {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    font-family: inherit;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    justify-content: center;
     align-items: center;
 }
 
-.input {
-    padding: 10px;
-    border: 1px solid var(--color-borde);
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 1rem;
-}
-
-/*BOTONES SISTEMA DE DISEÑO*/
-.btn {
-    padding: 8px 16px;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-weight: bold;
-    font-family: inherit;
-    font-size: 0.9rem;
-    transition: background-color 0.2s, transform 0.1s;
-    display: inline-block;
-}
+.btn:active { transform: scale(0.98); } /* Efecto de click realista */
 
 .btn--exito {
     background-color: var(--color-azul-primario);
     color: var(--color-blanco);
+    box-shadow: 0 2px 4px rgba(30, 58, 138, 0.3);
 }
 .btn--exito:hover { background-color: var(--color-azul-hover); }
 
 .btn--advertencia {
     background-color: var(--color-blanco);
     color: var(--color-negro);
-    border: 2px solid var(--color-negro);
+    border: 1px solid var(--color-borde);
 }
-.btn--advertencia:hover { background-color: #f0f0f0; }
+.btn--advertencia:hover { 
+    background-color: #F8FAFC; 
+    border-color: var(--color-negro);
+}
 
 .btn--peligro {
     background-color: var(--color-negro);
     color: var(--color-blanco);
 }
-.btn--peligro:hover { background-color: #333333; }
+.btn--peligro:hover { background-color: #334155; }
 
-.btn--enlace {
-    background: transparent;
-    color: var(--color-blanco);
-    border: 1px solid var(--color-blanco);
-}
-.btn--enlace:hover {
-    background-color: var(--color-blanco);
-    color: var(--color-azul-nav);
-}
-
-/*PÁGINA DE LOGIN*/
-
+/* =========================================================
+   MÓDULOS ESPECÍFICOS (Login y Edición)
+   ========================================================= */
 .pantalla-completa {
     display: flex;
     justify-content: center; 
     align-items: center;     
     min-height: 100vh;
+    background-color: var(--color-azul-nav); /* Fondo oscuro para el login */
 }
 
 .tarjeta--login {
     width: 100%;
-    max-width: 350px; 
+    max-width: 400px; 
     padding: 40px;
-    box-sizing: border-box; 
-    text-align: center;
 }
-
-.formulario-django p {
-    text-align: left; 
-    margin-bottom: 15px;
-}
-
-.formulario-django label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: 5px;
-    color: var(--color-texto);
-}
-
-.formulario-django input {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid var(--color-borde);
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 1rem;
-    box-sizing: border-box;
-}
-
-.btn--oscuro {
-    background-color: var(--color-azul-nav);
-    color: var(--color-blanco);
-    margin-top: 10px;
-}
-
-.btn--oscuro:hover { 
-    background-color: var(--color-azul-hover); 
-}
-
-/*PÁGINA DE EDICIÓN*/
 
 .tarjeta--edicion {
-    max-width: 500px;
+    max-width: 550px;
     margin: 0 auto; 
     margin-top: 20px;
 }
 
-.cabecera-seccion {
-    text-align: center;
-    margin-bottom: 30px;
-}
+.btn--bloque { width: 100%; margin-top: 20px; }
 
-.formulario-vertical {
-    display: flex;
-    flex-direction: column;
-    gap: 12px; 
-}
-
-.formulario-vertical label {
-    font-weight: 600;
-    color: var(--color-texto);
-    margin-bottom: -5px; 
-    margin-top: 10px;   
-}
-
-.formulario-vertical label:first-child {
-    margin-top: 0; 
-}
-
-.btn--bloque {
-    width: 100%;
-    margin-top: 15px;
-    padding: 12px;
-    font-size: 1rem;
-}
-
-/*ALERTAS Y MENSAJES*/
+/* =========================================================
+   ALERTAS Y MENSAJES
+   ========================================================= */
 .alerta {
-    padding: 10px;
-    border-radius: 4px;
+    padding: 12px 16px;
+    border-radius: 6px;
     margin-bottom: 20px;
-    font-weight: bold;
+    font-weight: 500;
     text-align: center;
 }
 
 .alerta--error {
     background-color: var(--color-error-fondo);
     color: var(--color-error-texto);
+    border: 1px solid #FCA5A5;
 }
 
+/* =========================================================
+   TEMA VIP Y COMPONENTES EXTRAS
+   ========================================================= */
+.tarjeta--oscura {
+    background-color: var(--color-azul-nav);
+    color: var(--color-blanco);
+    border: none;
+}
 
-/*ENLACES Y PIES DE TARJETA*/
+.tarjeta--oscura h1, .tarjeta--oscura h2, .tarjeta--oscura h3 {
+    color: var(--color-oro);
+    border-bottom-color: rgba(255,255,255,0.1);
+}
+
+.caja-resaltada {
+    margin: 20px 0;
+    padding: 20px;
+    background-color: var(--color-fondo-transparente);
+    border-radius: 8px;
+    border: 1px solid rgba(212, 175, 55, 0.3); /* Borde sutil dorado */
+}
+
+.progreso-circular {
+    font-size: 2.5rem;
+    font-weight: 800;
+    color: var(--color-azul-primario);
+    display: block;
+    margin: 10px 0;
+}
+
 .pie-tarjeta {
-    margin-top: 25px;
-    padding-top: 15px;
+    margin-top: 30px;
+    padding-top: 20px;
     border-top: 1px solid var(--color-borde);
     text-align: center;
 }
 
-.pie-tarjeta--sin-borde { border-top: none; }
-
 .pie-tarjeta p {
     color: var(--color-gris-texto);
     font-size: 0.9rem;
-    margin-bottom: 5px;
 }
-
-.enlace {
-    color: var(--color-texto);
-    text-decoration: none;
-    font-size: 0.95rem;
-}
-.enlace:hover { text-decoration: underline; }
-
-.enlace--destacado {
-    color: var(--color-azul-primario);
-    font-weight: bold;
-}
-
-/*TEMA VIP (Oscuro y Dorado)*/
-.tarjeta--oscura {
-    background-color: var(--color-azul-nav);
-    color: var(--color-oro);
-    max-width: 600px; 
-}
-
-.tarjeta--oscura h1, 
-.tarjeta--oscura h2, 
-.tarjeta--oscura h3 {
-    color: var(--color-oro);
-}
-
-.caja-resaltada {
-    margin: 30px 0;
-    padding: 20px;
-    background-color: var(--color-fondo-transparente);
-}
-
-.btn--vip {
-    background-color: var(--color-azul-nav);
-    color: var(--color-oro);
-}
-
-.btn--vip-peligro {
-    background: transparent;
-    color: var(--color-error-texto);
-    border: 2px solid var(--color-error-texto);
-    padding: 10px 20px;
-    font-size: 1.1rem;
-}
-
