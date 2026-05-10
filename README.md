@@ -1,66 +1,81 @@
-# ProyectoWebColaboradores
-# Intranet Corporativa & Portal VIP (Django Full-Stack)
+# Sistema Analítico CBR - Cookware Corp
+# Gestión de Riesgo Crediticio y Recuperación de Cartera (Django Full-Stack)
 
-![Estado](https://img.shields.io/badge/Estado-Completado-success)
+![Estado](https://img.shields.io/badge/Estado-Desplegado_en_Producci%C3%B3n-success)
 ![Python](https://img.shields.io/badge/Python-3.x-3776AB?logo=python)
 ![Django](https://img.shields.io/badge/Django-MVT-092E20?logo=django)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-Render-336791?logo=postgresql)
+![JavaScript](https://img.shields.io/badge/JavaScript-AJAX/jQuery-F7DF1E?logo=javascript)
 ![CSS3](https://img.shields.io/badge/CSS3-BEM_Architecture-1572B6?logo=css3)
-![JavaScript](https://img.shields.io/badge/JavaScript-Fetch_API-F7DF1E?logo=javascript)
 
 ## Descripción del Proyecto
-Este proyecto es una aplicación web full-stack desarrollada bajo la arquitectura **Modelo-Vista-Template (MVT)** de Django. Funciona como una intranet corporativa para la gestión de un catálogo de productos (ollas), destacando por la implementación de **dos sistemas de autenticación completamente independientes** coexistiendo en la misma aplicación, junto con integración de peticiones asíncronas para consumo de datos.
+Este proyecto es una aplicación web full-stack desarrollada bajo la arquitectura **Modelo-Vista-Template (MVT)** de Django. Funciona como un ecosistema corporativo para una empresa de utensilios de cocina, enfocado en el análisis de riesgo crediticio de los clientes y la gestión de cobranza. 
+
+El núcleo del sistema es un **Motor de Razonamiento Basado en Casos (CBR)** que evalúa el historial de mora de los clientes para asignar categorías de riesgo dinámicas y restringir operaciones financieras en tiempo real.
+
+## 🚀 Enlace a Producción
+El sistema se encuentra desplegado y funcional en la nube a través de Render:
+**👉 [Visitar la Intranet Corporativa](COLOCA_AQUI_EL_LINK_DE_RENDER)**
+
+---
 
 ## Funcionalidades y Logros de Ingeniería
 
-### 1. Gestión de Catálogo (CRUD)
-* **Create, Read, Update, Delete:** Operaciones completas a la base de datos protegidas por vistas seguras.
+### 1. Motor Analítico de Riesgo (CBR)
+* **Algoritmo de Scoring:** Cálculo matemático en el backend que clasifica a los clientes en categorías (Aceptable, Medio, Crítico) basándose en su historial de pagos y severidad de mora.
+* **Ciclo de Aprendizaje:** Registro de intervenciones de cobranza donde el sistema recalcula el riesgo automáticamente tras evaluar el éxito o fracaso de una técnica aplicada.
 
-### 2. Autenticación Dual 
-* **Sistema Principal:** Autenticación nativa de Django con enrutamiento protegido (`@login_required`).
-* **Portal VIP (Custom Auth):** Sistema paralelo construido **desde cero** para comprender el ciclo de vida HTTP. 
-  * Algoritmo de encriptado de contraseñas (`make_password`, `check_password`).
-  * Gestión manual de *cookies* y variables de sesión (`request.session`).
-  * Vistas y rutas blindadas manualmente contra intrusos.
+### 2. Prevención de Riesgo en Tiempo Real (AJAX)
+* **API Interna:** Creación de endpoints (`JsonResponse`) consumidos asíncronamente vía JavaScript.
+* **Filtrado Dinámico (DOM):** Al momento de registrar una venta, el sistema consulta el riesgo del cliente sin recargar la página y bloquea opciones de financiamiento a largo plazo para perfiles críticos, mitigando el error humano.
 
-### 3. Arquitectura Frontend 
-* **HTML5 Semántico:** Estructuración estricta usando `<main>`, `<section>`, `<header>`, `<footer>` y `<ul>` para garantizar accesibilidad y lectura por *Screen Readers*.
-* **Diseño CSS Global y Metodología BEM:** * Normalización de etiquetas nativas (`inputs`, `buttons`).
-  * Implementación del patrón *Block Element Modifier* (ej. `.btn--vip`) para un código escalable y libre de estilos en línea.
-  * Uso intensivo de *Flexbox* y *CSS Grid* para un diseño 100% responsivo.
+### 3. Seguridad y Control de Acceso (RBAC)
+* Implementación estricta del decorador `@login_required` y validación de roles (`is_staff`).
+* **Panel de Administrador:** Acceso exclusivo a la configuración paramétrica (Diferidos, Técnicas CBR, Categorías) y gestión de nómina.
+* **Panel de Colaborador:** Interfaz operativa enfocada en las métricas personales de ventas y gestión de clientes asignados en mora.
 
-## 4. Instalación y Configuración Local
-Si deseas probar este proyecto en tu entorno local, sigue estos pasos:
+### 4. Arquitectura Frontend y UX/UI
+* **Plantillas Genéricas DRY:** Uso avanzado de la herencia de Django (`{% extends %}`, `{% block %}`) para renderizar formularios CRUD múltiples desde un único archivo HTML.
+* **Diseño CSS Global y Metodología BEM:** Arquitectura de estilos escalable, uso de *Flexbox* y *CSS Grid* para un diseño 100% responsivo y adaptado al entorno corporativo.
+* **WhiteNoise:** Configuración optimizada para servir archivos estáticos eficientemente en producción.
+
+---
+
+## Instalación y Configuración Local
+Si deseas probar o auditar el código de este proyecto en tu entorno local, sigue estos pasos:
 
 1. **Clona el repositorio:**
    ```bash
    git clone [https://github.com/tu-usuario/tu-repositorio.git](https://github.com/tu-usuario/tu-repositorio.git)
-    ```
+   ```
 
-2. **Crea y activa el entorno virtual**
- ```bash
-python -m venv venv
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
- ```
- 
-3. **Instala las dependencias**
- ```bash
-pip install django
- ```
+2. **Crea y activa el entorno virtual:**
+   ```bash
+   python -m venv venv
+   # Windows:
+   venv\Scripts\activate
 
-4. **Ejectua las migraciones**
-```bash
-python manage.py makemigrations
-python manage.py migrate
- ```
+   # Mac/Linux:
+   source venv/bin/activate
 
-5. **Inicia el servidor**
-```bash
-python manage.py runserver
- ```
-Navega a http://127.0.0.1:8000/ para ver la aplicación.
+3. **Instala las dependencias exactas:**
+   ```bash
+   pip install -r requirements.txt
 
-## 5. Autor
-Ricardo Herrera - Estudiante de Ingeniería de Software
+4. **Ejecuta las migraciones del sistema:**
+   ```bash
+   python manage.py makemigrations
+   python manage.py migrate
+
+5. **Crea un superusuario (Administrador):**
+   ```bash
+   python manage.py createsuperuser
+
+6. **Inicia el servidor de desarrollo:**
+   ```bash
+   python manage.py runserver
+
+Navega a http://127.0.0.1:8000/ e inicia sesión con las credenciales creadas.
+
+### Autor
+Ricardo Herrera Estudiante de Ingeniería de Software - Universidad de las Américas (UDLA)
