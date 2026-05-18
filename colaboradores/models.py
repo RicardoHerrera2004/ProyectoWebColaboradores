@@ -115,8 +115,11 @@ class Venta(models.Model):
     # El diferido puede ser nulo si la venta es al contado (Riesgo Crítico)
     diferido = models.ForeignKey(Diferido, on_delete=models.PROTECT, null=True, blank=True)
     
+    producto = models.ForeignKey('Producto', on_delete=models.PROTECT, related_name='ventas_producto', null=True, blank=True)
+    
     fecha_emision = models.DateTimeField(auto_now_add=True)
     total_pagar = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
+    descripcion_venta = models.TextField(blank=True, null=True, help_text="Descripción de los productos vendidos")
     estado_pago = models.CharField(max_length=20, choices=ESTADOS_PAGO, default='AL_DIA')
     
     comision_ganada = models.DecimalField(

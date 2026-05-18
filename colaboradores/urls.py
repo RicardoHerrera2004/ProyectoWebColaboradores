@@ -63,4 +63,5 @@ urlpatterns = [
     # ---------------------------------------------------------
     # Endpoint para el dropdown dependiente según el Scoring de Riesgo
     path('api/diferidos-permitidos/', views.cargar_diferidos, name='ajax_cargar_diferidos'),
+    path('ajax/obtener-precio-producto/', views.ajax_obtener_precio_producto, name='ajax_obtener_precio_producto'),
 ]

@@ -14,11 +14,17 @@
   </header>
 
   <article class="tarjeta">
-    <header class="tarjeta__cabecera" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
       <h2 style="font-size: 1.4rem;">Registro de Operaciones</h2>
-      <span style="background-color: #F1F5F9; color: var(--color-azul-primario); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
-        📊 {{ ventas.count }} Transacciones Totales
-      </span>
+      
+      <div style="display: flex; gap: 10px;">
+        <span style="background-color: #F1F5F9; color: var(--color-azul-primario); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
+          📊 {{ ventas.count }} Transacciones
+        </span>
+        <span style="background-color: #ECFDF5; color: #065F46; padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold; border: 1px solid #A7F3D0;">
+          💰 Total Comisiones: ${{ total_comisiones }}
+        </span>
+      </div>
     </header>
 
     <section class="tarjeta__cuerpo">
@@ -31,6 +37,8 @@
               <th>Colaborador</th>
             {% endif %}
             <th>Financiamiento (CBR)</th>
+            <th>Total Venta</th>
+            <th>Monto Comisión</th>
             <th>Estado de Pago</th>
             <th style="text-align: center;">Acciones</th>
           </tr>
@@ -57,21 +65,37 @@
             {% if request.user.is_staff %}
             <td>
               <span style="font-size: 0.95rem; color: var(--color-texto);">
-                {{ venta.colaborador.nombre_completo }}
+                {{ venta.colaborador.user.username|title }}
               </span>
             </td>
             {% endif %}
 
             <td>
               <div style="font-weight: 600; color: var(--color-negro);">
-                {{ venta.diferido.meses_plazo }} meses plazo
+                {% if venta.diferido %}
+                  {{ venta.diferido.meses_plazo }} meses plazo
+                {% else %}
+                  <span style="color: var(--color-error-texto); font-weight: bold;">Al Contado</span>
+                {% endif %}
               </div>
               <div style="font-size: 0.85rem; color: var(--color-gris-texto); margin-top: 4px;">
-                Tasa Int: {{ venta.diferido.porcentaje_interes }}% 
+                Tasa Int: {% if venta.diferido %}{{ venta.diferido.porcentaje_interes }}%{% else %}0%{% endif %}
                 {% if venta.diferido.requiere_entrada %}
                   <span style="color: #B45309; font-weight: bold;">(Con Entrada)</span>
                 {% endif %}
               </div>
+            </td>
+
+            <td>
+              <strong style="color: var(--color-negro); font-size: 1rem;">
+                ${{ venta.total_pagar }}
+              </strong>
+            </td>
+
+            <td>
+              <span style="color: #059669; font-weight: bold; background-color: #E6F4EA; padding: 4px 8px; border-radius: 4px; font-size: 0.95rem;">
+                +${{ venta.comision_ganada }}
+              </span>
             </td>
 
             <td>
@@ -85,7 +109,7 @@
                 </span>
               {% else %}
                 <span style="background-color: #F1F5F9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; border: 1px solid #CBD5E1;">
-                  {{ venta.estado_pago }}
+                  {{ venta.get_estado_pago_display|default:venta.estado_pago }}
                 </span>
               {% endif %}
             </td>
@@ -98,7 +122,7 @@
           </tr>
           {% empty %}
           <tr>
-            <td colspan="6" style="text-align: center; padding: 40px; color: var(--color-gris-texto);">
+            <td colspan="8" style="text-align: center; padding: 40px; color: var(--color-gris-texto);">
               No se registran transacciones comerciales en el sistema bajo este perfil.
             </td>
           </tr>
@@ -109,7 +133,7 @@
 
     <footer class="pie-tarjeta" style="background-color: #F8FAFC; padding: 15px; border-radius: 0 0 8px 8px; margin: 20px -24px -24px -24px; border-top: 1px solid var(--color-borde);">
       <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem;">
-        <strong style="color: var(--color-azul-primario);">📌 Nota de Contexto:</strong> Este historial mapea las relaciones inyectadas por el ORM. Si una venta cambia su estado a <span style="color: var(--color-error-texto); font-weight: bold;">En Mora</span>, el cliente quedará expuesto inmediatamente en el tablero operativo del colaborador para su intervención analítica.
+        <strong style="color: var(--color-azul-primario);">📌 Nota de Auditoría:</strong> Las comisiones desplegadas reflejan el estado del riesgo inyectado por el servicio financiero en el instante exacto del cierre de la operación comercial.
       </p>
     </footer>
   </article>

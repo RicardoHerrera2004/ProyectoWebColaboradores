@@ -36,7 +36,7 @@ def calcular_scoring_riesgo(cliente):
 def calcular_comision_vendedor(venta):
     
     # 1. Obtenemos el precio total del producto 
-    monto_venta = Decimal(str(venta.producto.precio))
+    monto_venta = Decimal(str(venta.total_pagar))
     
     # 2. Definimos una comisión base estándar (5% de la venta)
     porcentaje_base = Decimal('0.05')

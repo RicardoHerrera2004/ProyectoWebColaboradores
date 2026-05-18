@@ -1,31 +1,12 @@
 {% extends 'principal_panel.html' %} {% block content %}
-<main
-  style="
-    display: flex;
-    justify-content: center;
-    padding-top: 20px;
-    min-height: calc(100vh - 150px);
-  "
->
-  <article
-    class="tarjeta tarjeta--edicion"
-    style="width: 100%; box-sizing: border-box; max-width: 650px"
-  >
-    <header
-      class="tarjeta__cabecera"
-      style="
-        text-align: center;
-        border-bottom: 1px solid var(--color-borde);
-        padding-bottom: 20px;
-        margin-bottom: 25px;
-      "
-    >
-      <h1
-        style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
-      >
+<main style="display: flex; justify-content: center; padding-top: 20px; min-height: calc(100vh - 150px);">
+  <article class="tarjeta tarjeta--edicion" style="width: 100%; box-sizing: border-box; max-width: 650px;">
+    
+    <header class="tarjeta__cabecera" style="text-align: center; border-bottom: 1px solid var(--color-borde); padding-bottom: 20px; margin-bottom: 25px;">
+      <h1 style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px;">
         Registrar Nueva Venta
       </h1>
-      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
+      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0;">
         Autorización de operaciones controlada por el Motor Analítico de Riesgo.
       </p>
     </header>
@@ -34,113 +15,86 @@
       <form method="POST" id="ventaForm" class="formulario-vertical">
         {% csrf_token %}
 
-        <h3
-          style="
-            font-size: 1.1rem;
-            color: var(--color-azul-primario);
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 5px;
-          "
-        >
+        <h3 style="font-size: 1.1rem; color: var(--color-azul-primario); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px;">
           1. Datos de los Participantes
         </h3>
 
-        <section style="margin-bottom: 20px">
-          <label for="{{ form.cliente.id_for_label }}"
-            >Seleccionar Cliente:</label
-          >
+        <section style="margin-bottom: 20px;">
+          <label for="{{ form.cliente.id_for_label }}">Seleccionar Cliente:</label>
           {{ form.cliente }}
-          <small
-            style="
-              display: block;
-              margin-top: 6px;
-              color: var(--color-gris-texto);
-              font-size: 0.85rem;
-            "
-          >
-            ℹ️ El sistema evaluará el riesgo y filtrará los planes permitidos
-            automáticamente al seleccionar.
+          <small style="display: block; margin-top: 6px; color: var(--color-gris-texto); font-size: 0.85rem;">
+            ℹ️ El sistema evaluará el riesgo y filtrará los planes permitidos automáticamente al seleccionar.
           </small>
         </section>
 
-        <section style="margin-bottom: 30px">
-          <label for="{{ form.colaborador.id_for_label }}"
-            >Vendedor Responsable:</label
-          >
+        <section style="margin-bottom: 30px;">
+          <label for="{{ form.colaborador.id_for_label }}">Vendedor Responsable:</label>
           {{ form.colaborador }}
         </section>
 
-        <h3
-          style="
-            font-size: 1.1rem;
-            color: var(--color-azul-primario);
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 5px;
-          "
-        >
+        <h3 style="font-size: 1.1rem; color: var(--color-azul-primario); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px;">
           2. Parámetros de la Operación
         </h3>
 
-        <section style="margin-bottom: 20px">
-          <label for="{{ form.diferido.id_for_label }}"
-            >Plan de Financiamiento Permitido:</label
-          >
+        <section style="margin-bottom: 20px;">
+          <label for="{{ form.diferido.id_for_label }}">Plan de Financiamiento Permitido:</label>
           {{ form.diferido }}
-
           <div id="riesgo-alerta"></div>
         </section>
 
-        <section style="margin-bottom: 20px">
-          <label for="{{ form.estado_pago.id_for_label }}"
-            >Estado Inicial de la Venta:</label
-          >
+        <section style="margin-bottom: 30px;">
+          <label for="{{ form.estado_pago.id_for_label }}">Estado Inicial de la Venta:</label>
           {{ form.estado_pago }}
         </section>
 
-        <nav style="display: flex; gap: 15px; margin-top: 35px">
-          <a
-            href="{% url 'principal_panel' %}"
-            class="btn btn--advertencia"
-            style="flex: 1; text-align: center"
-          >
+        <h3 style="font-size: 1.1rem; color: var(--color-azul-primario); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px;">
+          3. Detalles Comerciales
+        </h3>
+
+        <section style="margin-bottom: 20px;">
+          <label for="id_producto">Seleccionar Producto del Catálogo:</label>
+          {{ form.producto }}
+        </section>
+
+        <section style="margin-bottom: 20px;">
+          <label for="{{ form.descripcion_venta.id_for_label }}">Descripción / Notas adicionales:</label>
+          {{ form.descripcion_venta }}
+        </section>
+
+        <section style="margin-bottom: 20px;">
+          <label for="id_total_pagar">Total a Pagar ($):</label>
+          {{ form.total_pagar }}
+        </section>
+
+        <nav style="display: flex; gap: 15px; margin-top: 35px;">
+          <a href="{% url 'principal_panel' %}" class="btn btn--advertencia" style="flex: 1; text-align: center;">
             Cancelar
           </a>
-          <button type="submit" class="btn btn--exito" style="flex: 2">
+          <button type="submit" class="btn btn--exito" style="flex: 2;">
             Autorizar y Registrar Venta
           </button>
         </nav>
+
       </form>
     </section>
 
-    <footer
-      class="pie-tarjeta"
-      style="
-        background-color: #f8fafc;
-        padding: 15px;
-        border-radius: 0 0 8px 8px;
-        margin: 30px -24px -24px -24px;
-      "
-    >
-      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
-        <strong style="color: var(--color-azul-primario)"
-          >⚡ Endpoints Dinámicos:</strong
-        >
-        Este formulario consume una API interna para garantizar que no se
-        otorguen planes riesgosos a clientes no aptos.
+    <footer class="pie-tarjeta" style="background-color: #f8fafc; padding: 15px; border-radius: 0 0 8px 8px; margin: 30px -24px -24px -24px;">
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem;">
+        <strong style="color: var(--color-azul-primario);">⚡ Endpoints Dinámicos:</strong>
+        Este formulario consume una API interna para garantizar que no se otorguen planes riesgosos a clientes no aptos.
       </p>
     </footer>
+
   </article>
 </main>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+  // --- Sensor 1: Filtrado de Diferidos según el Cliente ---
   $("#id_cliente").change(function () {
     const url = "{% url 'ajax_cargar_diferidos' %}";
     const clienteId = $(this).val();
 
-    // Limpiamos la alerta al cambiar de cliente
     $("#riesgo-alerta").html("");
 
     if (clienteId !== "") {
@@ -155,7 +109,6 @@
 
           $("#id_diferido").html(html_data);
 
-          // Inyectamos la alerta con el diseño premium si el API restringe los planes
           if (data.length <= 2) {
             $("#riesgo-alerta").html(`
               <div style="margin-top: 10px; background-color: var(--color-error-fondo); color: var(--color-error-texto); padding: 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600; border: 1px solid #FCA5A5; display: flex; align-items: center; gap: 8px;">
@@ -166,8 +119,25 @@
         },
       });
     } else {
-      // Si el usuario vuelve a seleccionar "---------", limpiamos el select de diferidos
       $("#id_diferido").html('<option value="">---------</option>');
+    }
+  });
+
+  // --- Sensor 2: Asignación de Precio según el Producto ---
+  $("#id_producto").change(function () {
+    const productoId = $(this).val();
+
+    if (productoId !== "") {
+      $.ajax({
+        url: "{% url 'ajax_obtener_precio_producto' %}",
+        data: { 'producto_id': productoId },
+        success: function (data) {
+          // Escribe automáticamente el precio en el cuadro de texto
+          $("#id_total_pagar").val(data.precio);
+        }
+      });
+    } else {
+      $("#id_total_pagar").val("0.00");
     }
   });
 </script>

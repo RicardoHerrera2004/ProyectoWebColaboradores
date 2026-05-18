@@ -4,6 +4,7 @@ from django.contrib.auth import login, logout
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.http import JsonResponse
+from django.db.models import Sum
 from .models import (Producto, Venta, Vendedor, Cliente, CategoriaRiesgo, Diferido, TecnicaMejora, HistorialGestion)
 from .services import calcular_scoring_riesgo, calcular_comision_vendedor
 from .forms import (ClienteForm, CategoriaRiesgoForm, DiferidoForm, TecnicaMejoraForm, HistorialGestionForm, VentaForm, CrearVendedorForm, EditarVendedorForm)
@@ -60,16 +61,60 @@ def historial_ventas(request):
     else:
         vendedor = get_object_or_404(Vendedor, user=request.user)
         ventas = Venta.objects.filter(colaborador=vendedor).order_by('-fecha_emision')
-    return render(request, 'historial_ventas.html', {'ventas': ventas})
+        
+    # 1. Ejecutamos la agregación pura
+    datos_agregados = ventas.aggregate(suma_total=Sum('comision_ganada'))
+
+    # 2. Extraemos el valor usando la clave personalizada 'suma_total'
+    monto_crudo = datos_agregados.get('suma_total')
+
+    # 3. Si es None (nulo), lo forzamos a ser 0.00
+    total_comisiones = monto_crudo if monto_crudo is not None else 0.00
+    
+    contexto = {
+        'ventas': ventas,
+        'total_comisiones': round(total_comisiones, 2)
+    }
+    
+    return render(request, 'historial_ventas.html', contexto)
 
 @login_required
 def registrar_venta(request):
     if request.method == 'POST':
         form = VentaForm(request.POST)
         if form.is_valid():
-            venta = form.save()
-            messages.success(request, f'Venta #{venta.id} autorizada según nivel de riesgo.')
-            return redirect('principal_panel')
+            # 1. commit=False: Construye el objeto Venta pero pausa el guardado en la BD
+            nueva_venta = form.save(commit=False)
+            
+            vendedor_perfil = Vendedor.objects.filter(user=request.user).first()
+            
+            # 2. Asignamos al colaborador automáticamente según quién esté logueado 
+            if vendedor_perfil:
+                nueva_venta.colaborador = vendedor_perfil
+            elif request.user.is_staff:
+                # Si es administrador y no tiene perfil de vendedor, buscamos el primer vendedor
+                # del sistema como respaldo, o puedes manejarlo según tu lógica de negocio.
+                primer_vendedor = Vendedor.objects.first()
+                if not primer_vendedor:
+                    messages.error(request, 'Error crítico: No existen vendedores registrados en el sistema para asociar la venta.')
+                    return redirect('principal_panel')
+                nueva_venta.colaborador = primer_vendedor
+            else:
+                messages.error(request, 'Tu usuario no tiene un perfil de vendedor asignado.')
+                return redirect('principal_panel')
+            
+            # 3. Llamamos al servicio financiero
+            comision = calcular_comision_vendedor(nueva_venta)
+            
+            # 4. Inyectamos la comisión calculada en el campo 
+            nueva_venta.comision_ganada = comision
+            
+            # 5. Hacemos el INSERT en PostgreSQL/SQLite
+            nueva_venta.save()
+            
+            # 6. Feedback claro al usuario
+            messages.success(request, f'Venta registrada con éxito. Comisión generada: ${comision}')
+            return redirect('historial_ventas')
         else:
             messages.error(request, 'La venta no cumple con las políticas de riesgo crediticio.')
     else:
@@ -391,3 +436,16 @@ def eliminar_tecnica(request, pk):
         tecnica.delete()
         messages.success(request, 'Técnica CBR eliminada exitosamente.')
     return redirect('lista_tecnicas')
+
+
+#==================================================
+# 10. ENDPOINT AJAX: OBTENER PRECIO DE PRODUCTO
+#==================================================
+
+def ajax_obtener_precio_producto(request):
+    producto_id = request.GET.get('producto_id')
+    try:
+        producto = Producto.objects.get(id=producto_id)
+        return JsonResponse({'precio': str(producto.precio)})
+    except Producto.DoesNotExist:
+        return JsonResponse({'precio': '0.00'})

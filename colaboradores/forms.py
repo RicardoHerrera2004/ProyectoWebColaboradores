@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from .models import Cliente, CategoriaRiesgo, Diferido, TecnicaMejora, HistorialGestion, Venta, Vendedor
+from .models import Cliente, CategoriaRiesgo, Diferido, Producto, TecnicaMejora, HistorialGestion, Venta, Vendedor
 
 # ---------------------------------------------------------
 # 1. FORMULARIO DE CLIENTE
@@ -130,13 +130,26 @@ class HistorialGestionForm(forms.ModelForm):
 class VentaForm(forms.ModelForm):
     class Meta:
         model = Venta
-        fields = ['colaborador', 'cliente', 'diferido', 'estado_pago']
+        fields = ['colaborador', 'cliente', 'diferido', 'estado_pago', 'producto', 'total_pagar', 'descripcion_venta']
         widgets = {
             'colaborador': forms.Select(attrs={'class': 'form-select'}),
             'cliente': forms.Select(attrs={'class': 'form-select'}),
             'diferido': forms.Select(attrs={'class': 'form-select'}), # Este dropdown se llenará vía AJAX
-            'estado_pago': forms.Select(attrs={'class': 'form-select'})
+            'estado_pago': forms.Select(attrs={'class': 'form-select'}),
+            'producto': forms.Select(attrs={'class': 'form-select'}),
+            'total_pagar': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'descripcion_venta': forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
         }
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Recorremos los productos y les agregamos el atributo data-precio en el HTML
+        if 'producto' in self.fields:
+            self.fields['producto'].queryset = Producto.objects.all()
+            # Este ciclo añade el precio de la DB a la etiqueta HTML <option>
+            self.fields['producto'].widget.choices = [
+                (p.id, p.nombre) for p in Producto.objects.all()
+            ]
 
     # Validación Back-End Maestra: Integrando las reglas de negocio del PDF
     def clean(self):
