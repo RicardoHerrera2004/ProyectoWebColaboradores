@@ -34,7 +34,8 @@ def principal_panel(request):
         contexto = {
             'total_clientes': Cliente.objects.count(),
             'ventas_mes': Venta.objects.count(),
-            'morosidad_global': Cliente.objects.filter(categoria_riesgo__codigo='CRITICO').count()
+            'morosidad_global': Cliente.objects.filter(categoria_riesgo__codigo='CRITICO').count(),
+            'productos': Producto.objects.all()
         }
         return render(request, 'principal_panel.html', contexto)
     else:
@@ -78,10 +79,10 @@ def calcular_scoring_riesgo(cliente):
 @login_required
 def historial_ventas(request):
     if request.user.is_staff:
-        ventas = Venta.objects.all().order_by('-fecha')
+        ventas = Venta.objects.all().order_by('-fecha_emision')
     else:
         vendedor = get_object_or_404(Vendedor, user=request.user)
-        ventas = Venta.objects.filter(colaborador=vendedor).order_by('-fecha')
+        ventas = Venta.objects.filter(colaborador=vendedor).order_by('-fecha_emision')
     return render(request, 'historial_ventas.html', {'ventas': ventas})
 
 @login_required
@@ -241,11 +242,6 @@ def eliminar_vendedor(request, pk):
 # ==========================================
 
 @login_required
-def panel_productos(request):
-    productos = Producto.objects.all()
-    return render(request, 'principal_panel.html', {'productos': productos, 'seccion': 'productos'})
-
-@login_required
 def crear_producto(request):
     if request.method == 'POST':
         Producto.objects.create(
@@ -256,7 +252,7 @@ def crear_producto(request):
             tipo=request.POST.get('tipo', 'OLLA')
         )
         messages.success(request, 'Producto añadido al catálogo.')
-    return redirect('panel_productos')
+    return redirect('principal_panel')
 
 @login_required
 def editar_producto(request, producto_id):
@@ -266,7 +262,7 @@ def editar_producto(request, producto_id):
         producto.precio = request.POST.get('precio')
         producto.stock = request.POST.get('stock')
         producto.save()
-        return redirect('panel_productos')
+        return redirect('principal_panel')
     return render(request, 'editar_producto.html', {'producto': producto})
 
 @login_required
@@ -274,7 +270,7 @@ def eliminar_producto(request, producto_id):
     producto = get_object_or_404(Producto, id=producto_id)
     if request.method == 'POST':
         producto.delete()
-    return redirect('panel_productos')
+    return redirect('principal_panel')
 
 # ==========================================
 # 7. CRUD: CATEGORÍAS DE RIESGO

@@ -90,7 +90,10 @@
         <ul>
           <li><a href="{% url 'principal_panel' %}">Tablero de Control</a></li>
           <li>
-            <a href="{% url 'registrar_venta' %}">Control de Riesgo / Vender</a>
+            <a href="{% url 'registrar_venta' %}">Registrar nueva Venta</a>
+          </li>
+          <li>
+            <a href="{% url 'historial_ventas' %}">Historial Ventas</a>
           </li>
           <li>
             <a href="{% url 'registrar_gestion_mora' %}"
@@ -317,18 +320,8 @@
                 <h3 style="margin-bottom: 5px; font-size: 1.2rem">
                   {{ producto.nombre }}
                 </h3>
-                <span
-                  style="
-                    background-color: #f1f5f9;
-                    color: var(--color-gris-texto);
-                    padding: 4px 8px;
-                    border-radius: 4px;
-                    font-size: 0.8rem;
-                    font-weight: bold;
-                  "
-                >
-                  {{ producto.get_tipo_display }} | SKU: {{ producto.codigo_sku
-                  }}
+                <span style="background-color: #f1f5f9; color: var(--color-gris-texto); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">
+                {{ producto.get_tipo_display }} | SKU: {{ producto.codigo_sku }}
                 </span>
               </header>
 

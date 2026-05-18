@@ -1,96 +1,117 @@
-{% extends 'principal_panel.html' %} {% block content %}
+{% extends 'principal_panel.html' %} 
+
+{% block content %}
 <main>
-  <header class="cabecera-seccion" style="margin-bottom: 30px">
-    <h1 style="font-size: 1.8rem; color: var(--color-negro)">
-      Historial de Transacciones
-    </h1>
-    <p style="color: var(--color-gris-texto)">
-      Registro detallado de ventas y estados de financiamiento de la cartera.
+  <header class="cabecera-seccion" style="margin-bottom: 30px;">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro);">Historial General de Ventas</h1>
+    <p style="color: var(--color-gris-texto);">
+      {% if request.user.is_staff %}
+        Auditoría global de operaciones comerciales y control de riesgo crediticio.
+      {% else %}
+        Registro personal de ventas autorizadas y estado de colocación.
+      {% endif %}
     </p>
   </header>
 
   <article class="tarjeta">
-    <header class="tarjeta__cabecera" style="margin-bottom: 20px">
-      <h2 style="font-size: 1.4rem">Ventas Realizadas</h2>
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center;">
+      <h2 style="font-size: 1.4rem;">Registro de Operaciones</h2>
+      <span style="background-color: #F1F5F9; color: var(--color-azul-primario); padding: 6px 12px; border-radius: 20px; font-size: 0.85rem; font-weight: bold;">
+        📊 {{ ventas.count }} Transacciones Totales
+      </span>
     </header>
 
     <section class="tarjeta__cuerpo">
       <table class="tabla-gestion">
         <thead>
           <tr>
-            <th>ID Venta</th>
-            <th>Fecha</th>
-            <th>Cliente</th>
-            <th>Total</th>
-            <th>Estado</th>
-            <th>Acciones</th>
+            <th>ID / Fecha</th>
+            <th>Cliente / Cédula</th>
+            {% if request.user.is_staff %}
+              <th>Colaborador</th>
+            {% endif %}
+            <th>Financiamiento (CBR)</th>
+            <th>Estado de Pago</th>
+            <th style="text-align: center;">Acciones</th>
           </tr>
         </thead>
         <tbody>
           {% for venta in ventas %}
           <tr>
-            <td><strong>#{{ venta.id }}</strong></td>
-            <td>{{ venta.fecha|date:"d/m/Y" }}</td>
-            <td>{{ venta.cliente.nombres }}</td>
-            <td><strong>${{ venta.total }}</strong></td>
             <td>
-              {% if venta.estado_pago == 'EN_MORA' %}
-              <span
-                style="
-                  background-color: var(--color-error-fondo);
-                  color: var(--color-error-texto);
-                  padding: 4px 8px;
-                  border-radius: 4px;
-                  font-size: 0.8rem;
-                  font-weight: bold;
-                  border: 1px solid #fca5a5;
-                "
-              >
-                {{ venta.get_estado_pago_display|upper }}
+              <span style="font-family: monospace; font-weight: bold; color: var(--color-azul-primario);">
+                #{{ venta.id }}
               </span>
+              <div style="font-size: 0.85rem; color: var(--color-gris-texto); margin-top: 4px;">
+                {{ venta.fecha_emision|date:"d/m/Y H:i" }}
+              </div>
+            </td>
+
+            <td>
+              <strong style="color: var(--color-negro);">{{ venta.cliente.nombres }}</strong>
+              <div style="font-size: 0.85rem; color: var(--color-gris-texto); margin-top: 4px; font-family: monospace;">
+                CC: {{ venta.cliente.identificacion }}
+              </div>
+            </td>
+
+            {% if request.user.is_staff %}
+            <td>
+              <span style="font-size: 0.95rem; color: var(--color-texto);">
+                {{ venta.colaborador.nombre_completo }}
+              </span>
+            </td>
+            {% endif %}
+
+            <td>
+              <div style="font-weight: 600; color: var(--color-negro);">
+                {{ venta.diferido.meses_plazo }} meses plazo
+              </div>
+              <div style="font-size: 0.85rem; color: var(--color-gris-texto); margin-top: 4px;">
+                Tasa Int: {{ venta.diferido.porcentaje_interes }}% 
+                {% if venta.diferido.requiere_entrada %}
+                  <span style="color: #B45309; font-weight: bold;">(Con Entrada)</span>
+                {% endif %}
+              </div>
+            </td>
+
+            <td>
+              {% if venta.estado_pago == 'AL_DIA' %}
+                <span style="background-color: #DCFCE7; color: #166534; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; border: 1px solid #86EFAC;">
+                  ✓ AL DÍA
+                </span>
+              {% elif venta.estado_pago == 'EN_MORA' %}
+                <span style="background-color: var(--color-error-fondo); color: var(--color-error-texto); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; border: 1px solid #FCA5A5;">
+                  ⚠ EN MORA
+                </span>
               {% else %}
-              <span
-                style="
-                  background-color: #e0f2fe;
-                  color: var(--color-azul-primario);
-                  padding: 4px 8px;
-                  border-radius: 4px;
-                  font-size: 0.8rem;
-                  font-weight: bold;
-                  border: 1px solid #bae6fd;
-                "
-              >
-                {{ venta.get_estado_pago_display|upper }}
-              </span>
+                <span style="background-color: #F1F5F9; color: #475569; padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold; border: 1px solid #CBD5E1;">
+                  {{ venta.estado_pago }}
+                </span>
               {% endif %}
             </td>
-            <td>
-              <a
-                href="{% url 'ver_historial_cliente' venta.cliente.id %}"
-                class="btn btn--advertencia"
-                style="padding: 4px 10px; font-size: 0.8rem"
-              >
-                Ver Expediente
+
+            <td style="text-align: center;">
+              <a href="{% url 'ver_historial_cliente' venta.cliente.id %}" class="btn btn--oscuro" style="padding: 6px 12px; font-size: 0.85rem; text-decoration: none; display: inline-block;">
+                🔎 Ver Expediente CBR
               </a>
             </td>
           </tr>
           {% empty %}
           <tr>
-            <td
-              colspan="6"
-              style="
-                text-align: center;
-                padding: 40px;
-                color: var(--color-gris-texto);
-              "
-            >
-              No se registran ventas en el periodo actual.
+            <td colspan="6" style="text-align: center; padding: 40px; color: var(--color-gris-texto);">
+              No se registran transacciones comerciales en el sistema bajo este perfil.
             </td>
           </tr>
           {% endfor %}
         </tbody>
       </table>
     </section>
+
+    <footer class="pie-tarjeta" style="background-color: #F8FAFC; padding: 15px; border-radius: 0 0 8px 8px; margin: 20px -24px -24px -24px; border-top: 1px solid var(--color-borde);">
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem;">
+        <strong style="color: var(--color-azul-primario);">📌 Nota de Contexto:</strong> Este historial mapea las relaciones inyectadas por el ORM. Si una venta cambia su estado a <span style="color: var(--color-error-texto); font-weight: bold;">En Mora</span>, el cliente quedará expuesto inmediatamente en el tablero operativo del colaborador para su intervención analítica.
+      </p>
+    </footer>
   </article>
 </main>
 {% endblock %}

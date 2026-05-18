@@ -1,83 +1,149 @@
 {% extends 'principal_panel.html' %} {% block content %}
-<main class="contenedor">
-  {% if messages %}
-  <section aria-label="Notificaciones del sistema">
-    {% for message in messages %}
-    <p
-      class="alerta {% if message.tags == 'error' %}alerta--error{% else %}btn--exito{% endif %}"
+<main
+  style="
+    display: flex;
+    justify-content: center;
+    padding-top: 20px;
+    min-height: calc(100vh - 150px);
+  "
+>
+  <article
+    class="tarjeta tarjeta--edicion"
+    style="width: 100%; box-sizing: border-box; max-width: 600px"
+  >
+    <header
+      class="tarjeta__cabecera"
+      style="
+        text-align: center;
+        border-bottom: 1px solid var(--color-borde);
+        padding-bottom: 20px;
+        margin-bottom: 25px;
+      "
     >
-      {{ message }}
-    </p>
-    {% endfor %}
-  </section>
-  {% endif %}
-
-  <article class="tarjeta">
-    <header class="tarjeta__cabecera">
-      <h2>Registro de Nuevo Cliente</h2>
-      <p>Ingrese los datos para la evaluación inicial de riesgo crediticio.</p>
+      <h1
+        style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
+      >
+        Registro de Nuevo Cliente
+      </h1>
+      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
+        Ingrese los datos para la evaluación inicial de riesgo crediticio.
+      </p>
     </header>
 
     <section class="tarjeta__cuerpo">
       <form method="POST" class="formulario-vertical">
         {% csrf_token %}
 
-        <fieldset>
-          <legend>Información Identitaria</legend>
+        <h3
+          style="
+            font-size: 1.1rem;
+            color: var(--color-azul-primario);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+          "
+        >
+          1. Información Identitaria
+        </h3>
 
-          <p>
-            <label for="{{ form.identificacion.id_for_label }}"
-              >Número de Cédula (Dato Sensible):</label
-            >
-            {{ form.identificacion }} {% if form.identificacion.errors %}
-            <span class="alerta--error"
-              >{{ form.identificacion.errors|first }}</span
-            >
-            {% endif %}
-            <small
-              >La cédula será validada mediante algoritmos de provincia y
-              longitud en el servidor.</small
-            >
-          </p>
-
-          <p>
-            <label for="{{ form.nombres.id_for_label }}"
-              >Nombres y Apellidos Completos:</label
-            >
-            {{ form.nombres }}
-          </p>
-        </fieldset>
-
-        <fieldset>
-          <legend>Clasificación de Cartera</legend>
-
-          <p>
-            <label for="{{ form.categoria_riesgo.id_for_label }}"
-              >Categoría de Riesgo Inicial:</label
-            >
-            {{ form.categoria_riesgo }}
-            <small
-              >Esta categoría condicionará los planes diferidos disponibles en
-              el módulo de ventas.</small
-            >
-          </p>
-        </fieldset>
-
-        <footer class="tarjeta__acciones pie-tarjeta pie-tarjeta--sin-borde">
-          <a href="{% url 'principal_panel' %}" class="btn btn--advertencia"
-            >Regresar al Panel</a
+        <section style="margin-bottom: 20px">
+          <label for="{{ form.identificacion.id_for_label }}"
+            >Número de Cédula (Dato Sensible):</label
           >
-          <button type="submit" class="btn btn--exito">
+          {{ form.identificacion }} {% if form.identificacion.errors %}
+          <span
+            style="
+              display: block;
+              margin-top: 6px;
+              color: var(--color-error-texto);
+              font-weight: 600;
+              font-size: 0.85rem;
+            "
+          >
+            ⚠️ {{ form.identificacion.errors|first }}
+          </span>
+          {% endif %}
+
+          <small
+            style="
+              display: block;
+              margin-top: 6px;
+              color: var(--color-gris-texto);
+              font-size: 0.85rem;
+            "
+          >
+            ℹ️ La cédula será validada mediante algoritmos de provincia y
+            longitud en el servidor.
+          </small>
+        </section>
+
+        <section style="margin-bottom: 30px">
+          <label for="{{ form.nombres.id_for_label }}"
+            >Nombres y Apellidos Completos:</label
+          >
+          {{ form.nombres }}
+        </section>
+
+        <h3
+          style="
+            font-size: 1.1rem;
+            color: var(--color-azul-primario);
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f1f5f9;
+            padding-bottom: 5px;
+          "
+        >
+          2. Clasificación de Cartera
+        </h3>
+
+        <section style="margin-bottom: 20px">
+          <label for="{{ form.categoria_riesgo.id_for_label }}"
+            >Categoría de Riesgo Inicial:</label
+          >
+          {{ form.categoria_riesgo }}
+          <small
+            style="
+              display: block;
+              margin-top: 6px;
+              color: var(--color-gris-texto);
+              font-size: 0.85rem;
+            "
+          >
+            ℹ️ Esta categoría condicionará los planes diferidos disponibles en
+            el módulo de ventas.
+          </small>
+        </section>
+
+        <nav style="display: flex; gap: 15px; margin-top: 35px">
+          <a
+            href="{% url 'principal_panel' %}"
+            class="btn btn--advertencia"
+            style="flex: 1; text-align: center"
+          >
+            Cancelar
+          </a>
+          <button type="submit" class="btn btn--exito" style="flex: 2">
             Registrar Cliente en el Core
           </button>
-        </footer>
+        </nav>
       </form>
     </section>
 
-    <footer class="pie-tarjeta">
-      <p>
-        Nota: Al registrar al cliente, el sistema habilita el seguimiento de
-        incidencias de mora total.
+    <footer
+      class="pie-tarjeta"
+      style="
+        background-color: #f8fafc;
+        padding: 15px;
+        border-radius: 0 0 8px 8px;
+        margin: 30px -24px -24px -24px;
+      "
+    >
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
+        <strong style="color: var(--color-azul-primario)"
+          >⚙️ Nota del Motor:</strong
+        >
+        Al registrar al cliente, el sistema habilita automáticamente el
+        seguimiento de incidencias de mora total.
       </p>
     </footer>
   </article>

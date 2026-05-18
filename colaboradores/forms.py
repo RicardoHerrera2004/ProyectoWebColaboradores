@@ -18,7 +18,7 @@ class ClienteForm(forms.ModelForm):
             'categoria_riesgo': forms.Select(attrs={'class': 'form-select'}) # Dropdown dependiente de la DB
         }
 
-    # Validación Back-End de dato sensible (Tu código original)
+    # Validación Back-End de dato sensible 
     def clean_identificacion(self):
         cedula = self.cleaned_data.get('identificacion')
 
@@ -43,12 +43,12 @@ class CategoriaRiesgoForm(forms.ModelForm):
         model = CategoriaRiesgo
         fields = ['codigo', 'descripcion', 'factor_severidad']
         widgets = {
-            'codigo': forms.TextInput(attrs={'class': 'form-control'}),
+            'codigo': forms.Select(attrs={'class': 'form-control'}),
             'descripcion': forms.TextInput(attrs={'class': 'form-control'}),
             'factor_severidad': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.1'})
         }
 
-    # Validación Back-End: El factor de severidad es crítico para tu ecuación CBR
+    # Validación Back-End: El factor de severidad es crítico para la ecuación CBR
     def clean_factor_severidad(self):
         factor = self.cleaned_data.get('factor_severidad')
         if factor <= 0:
@@ -119,7 +119,6 @@ class HistorialGestionForm(forms.ModelForm):
         observaciones = self.cleaned_data.get('observaciones')
         fue_exitosa = self.cleaned_data.get('fue_exitosa')
         
-        # Regla: Si la técnica falló, el gestor está obligado a dejar una observación
         if not fue_exitosa and (not observaciones or len(observaciones.strip()) < 5):
             raise ValidationError("Si la gestión no fue exitosa, debe ingresar una observación detallando el motivo.")
         return observaciones
@@ -148,12 +147,12 @@ class VentaForm(forms.ModelForm):
         if cliente and cliente.categoria_riesgo:
             riesgo = cliente.categoria_riesgo.codigo
             
-            # REGLA PDF: Riesgo Crítico deshabilita planes a largo plazo [cite: 42]
+            # REGLA PDF: Riesgo Crítico deshabilita planes a largo plazo 
             if riesgo == 'CRITICO' and diferido:
                 if diferido.meses_plazo > 3:
                     raise ValidationError(f"Operación denegada: El cliente {cliente.nombres} tiene riesgo CRÍTICO. No se permiten diferidos mayores a 3 meses.")
             
-            # REGLA PDF: Riesgo Medio exige enganche (entrada) [cite: 44]
+            # REGLA PDF: Riesgo Medio exige enganche (entrada) 
             elif riesgo == 'MEDIO' and diferido:
                 if not diferido.requiere_entrada:
                     raise ValidationError(f"Operación denegada: El cliente {cliente.nombres} tiene riesgo MEDIO. El plan diferido seleccionado debe requerir entrada/enganche obligatoriamente.")

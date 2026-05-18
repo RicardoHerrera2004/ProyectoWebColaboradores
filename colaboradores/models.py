@@ -6,7 +6,8 @@ from django.core.validators import MinValueValidator
 # MODELOS DE ADMINISTRACIÓN Y CORE CBR 
 
 class CategoriaRiesgo(models.Model):
-    codigo = models.CharField(max_length=20, unique=True, help_text="Ej: ACEPTABLE, MEDIO, CRITICO")
+    opciones_codigo = ['ACEPTABLE', 'MEDIO', 'CRITICO'] # Para validación en el formulario 
+    codigo = models.CharField(max_length=20, unique=True, choices=[(opcion, opcion.upper()) for opcion in opciones_codigo], help_text="Seleccione el nivel de riesgo")
     descripcion = models.CharField(max_length=255)
     factor_severidad = models.FloatField(help_text="Multiplicador para el cálculo del scoring")
 

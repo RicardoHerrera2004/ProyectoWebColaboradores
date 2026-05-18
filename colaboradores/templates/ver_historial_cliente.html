@@ -71,18 +71,9 @@
               {% endif %}
             </td>
 
-            <td
-              style="
-                font-size: 0.95rem;
-                line-height: 1.4;
-                color: var(--color-texto);
-              "
-            >
-              {{ gestion.observaciones|default:"<span
-                style="color: #94a3b8; font-style: italic"
-                >Sin observaciones registradas</span
-              >"|safe }}
-            </td>
+<td style="font-size: 0.95rem; line-height: 1.4; color: var(--color-texto);">
+  {{ gestion.observaciones|default:"<span style='color: #94a3b8; font-style: italic;'>Sin observaciones registradas</span>"|safe }}
+</td>
           </tr>
           {% empty %}
           <tr>
