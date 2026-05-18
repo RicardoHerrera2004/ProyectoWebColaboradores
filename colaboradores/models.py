@@ -119,6 +119,40 @@ class Venta(models.Model):
     total_pagar = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
     estado_pago = models.CharField(max_length=20, choices=ESTADOS_PAGO, default='AL_DIA')
     
+    comision_ganada = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2, 
+        default=0.00,
+        help_text="Monto exacto de comisión guardado en el momento de la venta."
+    )
+    
+    def save(self, *args, **kwargs):
+        # 1. Primero guardamos la Venta normalmente en la base de datos
+        super().save(*args, **kwargs) 
+        
+        # 2. Le decimos al sistema que cuente cuántas ventas 'EN MORA' tiene este cliente exacto
+        moras_reales = Venta.objects.filter(cliente=self.cliente, estado_pago='EN_MORA').count()
+        
+        # 3. Actualizamos el contador del cliente con la realidad
+        self.cliente.incidencias_mora_total = moras_reales
+        
+        # 4. APLICAMOS EL SCORING DIRECTAMENTE AQUÍ (Lógica matemática)
+        total_diferidos = self.cliente.compras_realizadas.count()
+        if total_diferidos > 0:
+            factor = self.cliente.categoria_riesgo.factor_severidad if self.cliente.categoria_riesgo else 1.0
+            score = (moras_reales / total_diferidos) * factor
+            
+            # Buscamos las categorías y actualizamos según los umbrales
+            if score > 0.8:
+                self.cliente.categoria_riesgo = CategoriaRiesgo.objects.get(codigo='CRITICO')
+            elif score > 0.4:
+                self.cliente.categoria_riesgo = CategoriaRiesgo.objects.get(codigo='MEDIO')
+            else:
+                self.cliente.categoria_riesgo = CategoriaRiesgo.objects.get(codigo='ACEPTABLE')
+                
+        # Finalmente, guardamos el cliente actualizado
+        self.cliente.save()
+    
     class Meta:
         verbose_name = 'Venta'
         verbose_name_plural = 'Ventas'

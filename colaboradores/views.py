@@ -5,6 +5,7 @@ from django.contrib.auth.forms import AuthenticationForm
 from django.contrib import messages
 from django.http import JsonResponse
 from .models import (Producto, Venta, Vendedor, Cliente, CategoriaRiesgo, Diferido, TecnicaMejora, HistorialGestion)
+from .services import calcular_scoring_riesgo, calcular_comision_vendedor
 from .forms import (ClienteForm, CategoriaRiesgoForm, DiferidoForm, TecnicaMejoraForm, HistorialGestionForm, VentaForm, CrearVendedorForm, EditarVendedorForm)
 
 # ==========================================
@@ -47,30 +48,6 @@ def principal_panel(request):
             'lista_ventas_mora': ventas_en_mora 
         }
         return render(request, 'panel_colaborador.html', contexto)
-
-# ==========================================
-# 2. MOTOR ANALÍTICO CBR (CORE)
-# ==========================================
-
-def calcular_scoring_riesgo(cliente):
-    """
-    Implementación de la ecuación Scoring (PDF 1.2.1):
-    Nivel_Riesgo = (Dias_Mora_Historico / Total_Diferidos) * Factor_Severidad
-    """
-    total_diferidos = cliente.compras_realizadas.count()
-    if total_diferidos == 0:
-        return # No hay historial suficiente
-    
-    factor = cliente.categoria_riesgo.factor_severidad if cliente.categoria_riesgo else 1.0
-    score = (cliente.incidencias_mora_total / total_diferidos) * factor
-
-    if score > 0.8:
-        cliente.categoria_riesgo = CategoriaRiesgo.objects.get(codigo='CRITICO')
-    elif score > 0.4:
-        cliente.categoria_riesgo = CategoriaRiesgo.objects.get(codigo='MEDIO')
-    else:
-        cliente.categoria_riesgo = CategoriaRiesgo.objects.get(codigo='ACEPTABLE')
-    cliente.save()
 
 # ==========================================
 # 3. MÓDULO DE VENTAS Y GESTIÓN DE MORA
