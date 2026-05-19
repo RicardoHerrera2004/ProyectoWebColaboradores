@@ -42,6 +42,8 @@ urlpatterns = [
     # Registro de Gestiones de Mora (Alimentación del Motor)
     path('gestiones/registrar/', views.registrar_gestion_mora, name='registrar_gestion_mora'),
     path('gestiones/historial/<int:cliente_id>/', views.ver_historial_cliente, name='ver_historial_cliente'),
+    path('gestiones/editar/<int:pk>/', views.editar_gestion_mora, name='editar_gestion_mora'),
+    path('gestiones/eliminar/<int:pk>/', views.eliminar_gestion_mora, name='eliminar_gestion_mora'),
 
     # ---------------------------------------------------------
     # 4. MÓDULO DE VENTAS Y PRODUCTOS
@@ -52,6 +54,8 @@ urlpatterns = [
 
     path('ventas/registrar/', views.registrar_venta, name='registrar_venta'),
     path('ventas/historial/', views.historial_ventas, name='historial_ventas'),
+    path('ventas/editar/<int:pk>/', views.editar_venta, name='editar_venta'),
+    path('ventas/eliminar/<int:pk>/', views.eliminar_venta, name='eliminar_venta'),
 
     path('colaboradores/', views.lista_vendedores, name='lista_vendedores'),
     path('colaboradores/crear/', views.crear_vendedor, name='crear_vendedor'),

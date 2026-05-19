@@ -1,5 +1,5 @@
 from decimal import Decimal
-from django.utils import timezone
+from django.db.models import Count
 from .models import CategoriaRiesgo, Cliente, Diferido, TecnicaMejora, HistorialGestion, Venta, Vendedor, Producto
 
 
@@ -60,3 +60,53 @@ def calcular_comision_vendedor(venta):
     
     # Retornamos el valor redondeado a 2 decimales
     return round(comision_calculada, 2)
+    
+#================================================
+# 3. MOTOR CBR DE RECOMENDACIÓN DE TÉCNICA DE COBRANZA 
+#================================================
+
+def motor_cbr_recomendar_tecnica(cliente_actual):
+    
+    # Encontramos la categoria actual del cliente
+    categoria_actual = cliente_actual.categoria_riesgo
+    
+    # Si el cliente es nuevo o no tiene riesgo calculado, no hay nada que predecir
+    if not categoria_actual:
+        return {
+            'recomendacion': 'Sin datos de riesgo',
+            'mensaje': 'El cliente no tiene un perfil de riesgo asignado por el motor.',
+            'confianza': 0
+        }
+
+    # Buscamos gestiones EXITOSAS en clientes del MISMO RIESGO
+    gestiones_similares = HistorialGestion.objects.filter(
+        cliente__categoria_riesgo=categoria_actual,
+        fue_exitosa=True 
+    )
+
+    # Si el sistema está vacío o no hay éxitos previos en este perfil, sugerimos la técnica estándar y explicamos la falta de data
+    if not gestiones_similares.exists():
+        return {
+            'recomendacion': 'Contacto Telefónico Básico',
+            'mensaje': 'No hay data histórica suficiente para este perfil de riesgo. Inicie con la técnica estándar.',
+            'confianza': 0
+        }
+
+    # Agrupamos por técnica y ver cuál ganó más veces
+    ranking_tecnicas = gestiones_similares.values('tecnica__nombre').annotate(
+        total_exitos=Count('id')
+    ).order_by('-total_exitos')
+
+    # Extraemos al ganador absoluto
+    mejor_tecnica = ranking_tecnicas.first()
+    
+    # Calculamos la matemática de confianza (Éxitos de esta técnica / Total de éxitos en este perfil)
+    total_casos_exitosos = gestiones_similares.count()
+    porcentaje_confianza = round((mejor_tecnica['total_exitos'] / total_casos_exitosos) * 100, 1)
+
+    # Entregamos el dictamen de la sugerencia al controlador
+    return {
+        'recomendacion': mejor_tecnica['tecnica__nombre'],
+        'mensaje': f"Basado en {mejor_tecnica['total_exitos']} casos de éxito en clientes con riesgo '{categoria_actual.codigo}'.",
+        'confianza': porcentaje_confianza
+    }

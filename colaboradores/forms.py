@@ -128,9 +128,19 @@ class HistorialGestionForm(forms.ModelForm):
 # 6. FORMULARIO DE VENTA (Para aplicar las reglas del PDF)
 # ---------------------------------------------------------
 class VentaForm(forms.ModelForm):
+    fecha_manual = forms.DateTimeField(
+        required=False,
+        widget=forms.DateTimeInput(attrs={
+            'class': 'form-control', 
+            'type': 'datetime-local',
+            'style': 'background-color: #FEF3C7; border: 1px solid #F59E0B;' # Color sutil ámbar de auditoría
+        }),
+        help_text="Opcional: Use este campo SOLO si desea anular la fecha actual del sistema (Retroactivos)."
+    )
+    
     class Meta:
         model = Venta
-        fields = ['colaborador', 'cliente', 'diferido', 'estado_pago', 'producto', 'total_pagar', 'descripcion_venta']
+        fields = ['colaborador', 'cliente', 'diferido', 'estado_pago', 'producto', 'total_pagar', 'descripcion_venta', 'fecha_manual']
         widgets = {
             'colaborador': forms.Select(attrs={'class': 'form-select'}),
             'cliente': forms.Select(attrs={'class': 'form-select'}),
@@ -138,7 +148,7 @@ class VentaForm(forms.ModelForm):
             'estado_pago': forms.Select(attrs={'class': 'form-select'}),
             'producto': forms.Select(attrs={'class': 'form-select'}),
             'total_pagar': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
-            'descripcion_venta': forms.Textarea(attrs={'class': 'form-control', 'rows': 3})
+            'descripcion_venta': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
         
     def __init__(self, *args, **kwargs):

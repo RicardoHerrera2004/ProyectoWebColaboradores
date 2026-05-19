@@ -6,7 +6,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
 from .models import (Producto, Venta, Vendedor, Cliente, CategoriaRiesgo, Diferido, TecnicaMejora, HistorialGestion)
-from .services import calcular_scoring_riesgo, calcular_comision_vendedor
+from .services import calcular_scoring_riesgo, calcular_comision_vendedor, motor_cbr_recomendar_tecnica
 from .forms import (ClienteForm, CategoriaRiesgoForm, DiferidoForm, TecnicaMejoraForm, HistorialGestionForm, VentaForm, CrearVendedorForm, EditarVendedorForm)
 
 # ==========================================
@@ -109,10 +109,15 @@ def registrar_venta(request):
             # 4. Inyectamos la comisión calculada en el campo 
             nueva_venta.comision_ganada = comision
             
-            # 5. Hacemos el INSERT en PostgreSQL/SQLite
+            # 5. Si el formulario incluye una fecha manual (retroactiva) y el usuario es admin, la asignamos
+            fecha_retroactiva = form.cleaned_data.get('fecha_manual')
+            if fecha_retroactiva and request.user.is_staff:
+                nueva_venta.fecha_emision = fecha_retroactiva
+            
+            # 6. Hacemos el INSERT en PostgreSQL/SQLite
             nueva_venta.save()
             
-            # 6. Feedback claro al usuario
+            # 7. Feedback claro al usuario
             messages.success(request, f'Venta registrada con éxito. Comisión generada: ${comision}')
             return redirect('historial_ventas')
         else:
@@ -121,6 +126,67 @@ def registrar_venta(request):
         form = VentaForm()
     return render(request, 'registrar_venta.html', {'form': form})
 
+@login_required
+def editar_venta(request, pk):
+    venta = get_object_or_404(Venta, pk=pk)
+    
+    if request.method == 'POST':
+        form = VentaForm(request.POST, instance=venta)
+        if form.is_valid():
+            # 1. Guardamos primero los datos generales de la venta
+            venta_editada = form.save(commit=False)
+            comision = calcular_comision_vendedor(venta_editada)
+            venta_editada.comision_ganada = comision
+            venta_editada.save() 
+            
+            # 2. ⚡ TRUCO DE INGENIERÍA: Forzamos la fecha manual rompiendo el bloqueo de auto_now_add
+            fecha_retroactiva = form.cleaned_data.get('fecha_manual')
+            if fecha_retroactiva and request.user.is_staff:
+                # Modificación directa en la base de datos por SQL/ORM sin pasar por validaciones de modelo
+                Venta.objects.filter(pk=venta.id).update(fecha_emision=fecha_retroactiva)
+                
+                # Recargamos la instancia para obligar al cliente a recalcular sus moras con la nueva línea temporal
+                venta_actualizada = Venta.objects.get(pk=venta.id)
+                venta_actualizada.save() 
+            
+            messages.success(request, f'Venta #{venta.id} actualizada con éxito en el Core.')
+            return redirect('historial_ventas')
+    else:
+        # Cargamos la fecha original para que se pinte en el input al entrar a editar
+        form = VentaForm(instance=venta, initial={
+            'fecha_manual': venta.fecha_emision.strftime('%Y-%m-%dT%H:%M') if venta.fecha_emision else None
+        })
+        
+    return render(request, 'registrar_venta.html', {'form': form, 'editando': True, 'venta': venta})
+
+@login_required
+def eliminar_venta(request, pk):
+    venta = get_object_or_404(Venta, pk=pk)
+    cliente_afectado = venta.cliente # Guardamos el cliente para el recálculo post-borrado
+    
+    if request.method == 'POST':
+        id_removido = venta.id
+        venta.delete()
+        
+        # Forzamos al cliente a recalcular sus métricas de riesgo ahora que la venta ya no existe
+        # Reutilizamos la lógica del save() creando una venta ficticia temporal o guardando al cliente
+        moras_reales = Venta.objects.filter(cliente=cliente_afectado, estado_pago='EN_MORA').count()
+        cliente_afectado.incidencias_mora_total = moras_reales
+        total_diferidos = cliente_afectado.compras_realizadas.count()
+        
+        if total_diferidos > 0:
+            factor = cliente_afectado.categoria_riesgo.factor_severidad if cliente_afectado.categoria_riesgo else 1.0
+        else:
+            cliente_afectado.incidencias_mora_total = 0
+            
+        cliente_afectado.save()
+        
+        messages.warning(request, f'La venta #{id_removido} ha sido eliminada del sistema de auditoría.')
+        return redirect('historial_ventas')
+        
+    return render(request, 'confirmar_eliminar_venta.html', {'venta': venta})
+
+@login_required
 def cargar_diferidos(request):
     cliente_id = request.GET.get('cliente_id')
     diferidos = Diferido.objects.all()
@@ -142,16 +208,80 @@ def cargar_diferidos(request):
 
 @login_required
 def registrar_gestion_mora(request):
+    # Capturamos el cliente desde los parámetros de la URL (?cliente_id=...)
+    cliente_id = request.GET.get('cliente_id')
+    cliente = get_object_or_404(Cliente, pk=cliente_id) if cliente_id else None
+
+    # El sistema analiza los casos de éxito del pasado para este perfil de riesgo
+    recomendacion_cbr = None
+    if cliente:
+        recomendacion_cbr = motor_cbr_recomendar_tecnica(cliente)
+
+    # Si el formulario se envía, lo procesamos normalmente y guardamos la gestión de mora
     if request.method == 'POST':
         form = HistorialGestionForm(request.POST)
         if form.is_valid():
-            gestion = form.save()
-            calcular_scoring_riesgo(gestion.cliente)
-            messages.success(request, 'Resultado de gestión guardado. El Motor CBR ha actualizado el perfil.')
-            return redirect('principal_panel')
+            nueva_gestion = form.save(commit=False)
+            
+            # Si el cliente no venía en la URL pero el formulario lo tiene, lo asignamos
+            if cliente:
+                nueva_gestion.cliente = cliente
+            
+            nueva_gestion.save()
+            calcular_scoring_riesgo(nueva_gestion.cliente)
+            # Mensaje de éxito informando el registro de la auditoría
+            messages.success(request, f'Gestión de cobranza registrada con éxito para {nueva_gestion.cliente.nombres}.')
+            return redirect('ver_historial_cliente', cliente_id=nueva_gestion.cliente.id)
     else:
-        form = HistorialGestionForm()
-    return render(request, 'registrar_gestion.html', {'form': form})
+        # Si ya conocemos al cliente por la URL, podemos pre-llenar el formulario u ocultar el campo
+        form = HistorialGestionForm(initial={'cliente': cliente}) if cliente else HistorialGestionForm()
+
+    # Enviamos los resultados del Core ('cbr') directo al contexto de la plantilla
+    contexto = {
+        'form': form,
+        'cliente': cliente,
+        'cbr': recomendacion_cbr  # Contiene: 'recomendacion', 'mensaje' y 'confianza'
+    }
+    
+    return render(request, 'registrar_gestion.html', contexto)
+
+@login_required
+def editar_gestion_mora(request, pk):
+    gestion = get_object_or_404(HistorialGestion, pk=pk)
+    cliente = gestion.cliente
+    
+    # Mantenemos el asistente CBR visible incluso al editar
+    recomendacion_cbr = motor_cbr_recomendar_tecnica(cliente)
+
+    if request.method == 'POST':
+        form = HistorialGestionForm(request.POST, instance=gestion)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Registro de gestión actualizado con éxito para {cliente.nombres}.')
+            return redirect('ver_historial_cliente', cliente_id=cliente.id)
+    else:
+        form = HistorialGestionForm(instance=gestion)
+
+    contexto = {
+        'form': form,
+        'cliente': cliente,
+        'cbr': recomendacion_cbr,
+        'editando': True,
+        'gestion': gestion
+    }
+    return render(request, 'registrar_gestion.html', contexto)
+
+@login_required
+def eliminar_gestion_mora(request, pk):
+    gestion = get_object_or_404(HistorialGestion, pk=pk)
+    cliente_id = gestion.cliente.id # Guardamos el ID antes de borrar para poder redireccionar
+    
+    if request.method == 'POST':
+        gestion.delete()
+        messages.warning(request, 'La intervención ha sido eliminada del expediente.')
+        return redirect('ver_historial_cliente', cliente_id=cliente_id)
+        
+    return render(request, 'confirmar_eliminar_gestion.html', {'gestion': gestion})
 
 # ==========================================
 # 4. CRUD: CLIENTES

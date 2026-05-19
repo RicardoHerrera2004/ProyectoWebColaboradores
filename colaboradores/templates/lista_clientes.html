@@ -99,6 +99,14 @@
 
             <td>
               <div style="display: flex; gap: 8px; flex-wrap: wrap">
+                
+                <a
+                  href="{% url 'ver_historial_cliente' cliente.id %}"
+                  class="btn btn--oscuro"
+                  style="padding: 6px 12px; font-size: 0.8rem; text-decoration: none;"
+                >
+                  🔎 Historial
+                </a>
                 <a
                   href="{% url 'registrar_gestion_mora' %}?cliente={{ cliente.id }}"
                   class="btn btn--exito"

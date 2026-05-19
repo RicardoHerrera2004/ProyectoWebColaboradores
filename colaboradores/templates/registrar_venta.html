@@ -4,7 +4,7 @@
     
     <header class="tarjeta__cabecera" style="text-align: center; border-bottom: 1px solid var(--color-borde); padding-bottom: 20px; margin-bottom: 25px;">
       <h1 style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px;">
-        Registrar Nueva Venta
+        {% if editando %}Modificar Venta #{{ venta.id }}{% else %}Registrar Nueva Venta{% endif %}
       </h1>
       <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0;">
         Autorización de operaciones controlada por el Motor Analítico de Riesgo.
@@ -29,7 +29,14 @@
 
         <section style="margin-bottom: 30px;">
           <label for="{{ form.colaborador.id_for_label }}">Vendedor Responsable:</label>
-          {{ form.colaborador }}
+          {% if request.user.is_staff %}
+            {{ form.colaborador }}
+          {% else %}
+            <div style="background-color: #F8FAFC; padding: 10px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: bold; color: var(--color-texto);">
+              👤 {{ request.user.username|title }}
+            </div>
+            <div style="display: none;">{{ form.colaborador }}</div>
+          {% endif %}
         </section>
 
         <h3 style="font-size: 1.1rem; color: var(--color-azul-primario); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px;">
@@ -66,12 +73,24 @@
           {{ form.total_pagar }}
         </section>
 
+        {% if request.user.is_staff %}
+        <h3 style="font-size: 1.1rem; color: #D97706; margin-top: 30px; margin-bottom: 15px; border-bottom: 2px solid #FDE68A; padding-bottom: 5px;">
+          🛠️ Controles de Auditoría Avanzada (Solo Admin)
+        </h3>
+        <section style="margin-bottom: 20px;">
+          <label for="{{ form.fecha_manual.id_for_label }}" style="color: #92400E; font-weight: bold;">Establecer Fecha Retroactiva:</label>
+          {{ form.fecha_manual }}
+          <small style="display: block; margin-top: 4px; color: #92400E; font-size: 0.8rem;">
+            Dejar en blanco para usar la hora actual de registro. Úselo para forzar pruebas de mora (+30 días).
+          </small>
+        </section>
+        {% endif %}
         <nav style="display: flex; gap: 15px; margin-top: 35px;">
-          <a href="{% url 'principal_panel' %}" class="btn btn--advertencia" style="flex: 1; text-align: center;">
+          <a href="{% url 'historial_ventas' %}" class="btn btn--advertencia" style="flex: 1; text-align: center;">
             Cancelar
           </a>
           <button type="submit" class="btn btn--exito" style="flex: 2;">
-            Autorizar y Registrar Venta
+            {% if editando %}Guardar Cambios{% else %}Autorizar y Registrar Venta{% endif %}
           </button>
         </nav>
 
@@ -90,6 +109,11 @@
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script>
+  // Al cargar la página, si el usuario NO es admin, bloqueamos el input de precio
+  {% if not request.user.is_staff %}
+    $("#id_total_pagar").attr("readonly", "readonly");
+  {% endif %}
+
   // --- Sensor 1: Filtrado de Diferidos según el Cliente ---
   $("#id_cliente").change(function () {
     const url = "{% url 'ajax_cargar_diferidos' %}";
@@ -132,7 +156,6 @@
         url: "{% url 'ajax_obtener_precio_producto' %}",
         data: { 'producto_id': productoId },
         success: function (data) {
-          // Escribe automáticamente el precio en el cuadro de texto
           $("#id_total_pagar").val(data.precio);
         }
       });

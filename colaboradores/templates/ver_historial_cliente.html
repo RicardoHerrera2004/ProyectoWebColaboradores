@@ -71,9 +71,22 @@
               {% endif %}
             </td>
 
-<td style="font-size: 0.95rem; line-height: 1.4; color: var(--color-texto);">
-  {{ gestion.observaciones|default:"<span style='color: #94a3b8; font-style: italic;'>Sin observaciones registradas</span>"|safe }}
-</td>
+            <td style="font-size: 0.95rem; line-height: 1.4; color: var(--color-texto);">
+              {{ gestion.observaciones|default:"<span style='color: #94a3b8; font-style: italic;'>Sin observaciones registradas</span>"|safe }}
+            </td>
+
+                    <td style="text-align: center;">
+            <div style="display: flex; gap: 6px; justify-content: center;">
+              <a href="{% url 'editar_gestion_mora' gestion.id %}" class="btn btn--exito" style="padding: 4px 8px; font-size: 0.8rem; background-color: #3B82F6; text-decoration: none;">
+      ✏️      Editar
+              </a>
+              
+              <a href="{% url 'eliminar_gestion_mora' gestion.id %}" class="btn btn--advertencia" style="padding: 4px 8px; font-size: 0.8rem; background-color: #EF4444; text-decoration: none;">
+              Borrar
+              </a>
+          </div>
+            </td>
+
           </tr>
           {% empty %}
           <tr>
@@ -88,7 +101,7 @@
               Este cliente no tiene gestiones previas registradas en el Motor
               CBR.
             </td>
-          </tr>
+          </tr>          
           {% endfor %}
         </tbody>
       </table>
@@ -113,7 +126,7 @@
           ← Volver a Clientes
         </a>
         <a
-          href="{% url 'registrar_gestion_mora' %}?cliente={{ cliente.id }}"
+          href="{% url 'registrar_gestion_mora' %}?cliente_id={{ cliente.id }}"
           class="btn btn--exito"
           style="
             padding: 8px 20px;

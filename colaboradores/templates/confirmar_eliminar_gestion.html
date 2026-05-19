@@ -1,0 +1,33 @@
+{% extends 'principal_panel.html' %}
+
+{% block content %}
+<main style="display: flex; justify-content: center; padding-top: 40px;">
+  <article class="tarjeta" style="max-width: 500px; width: 100%; border: 1px solid #FCA5A5;">
+    <header class="tarjeta__cabecera" style="background-color: #FEF2F2; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
+      <h1 style="color: #991B1B; font-size: 1.4rem; margin: 0;">⚠️ Eliminar Intervención CBR</h1>
+    </header>
+    
+    <section class="tarjeta__cuerpo" style="padding: 24px; text-align: center;">
+      <p style="color: var(--color-texto); font-size: 1rem; margin-bottom: 20px;">
+        ¿Estás seguro de que deseas eliminar permanentemente este registro de gestión?
+      </p>
+      
+      <div style="background-color: #F8FAFC; padding: 15px; border-radius: 6px; text-align: left; font-size: 0.9rem; margin-bottom: 25px; border: 1px solid #E2E8F0;">
+        <strong>Técnica:</strong> {{ gestion.tecnica.nombre }}<br>
+        <strong>Fecha:</strong> {{ gestion.fecha_aplicacion|date:"d/m/Y" }}<br>
+        <strong>Resultado:</strong> {% if gestion.fue_exitosa %}Exitosa{% else %}Fallida{% endif %}
+      </div>
+
+      <form method="POST" style="display: flex; gap: 15px;">
+        {% csrf_token %}
+        <a href="{% url 'ver_historial_cliente' gestion.cliente.id %}" class="btn btn--oscuro" style="flex: 1; text-align: center; text-decoration: none;">
+          Cancelar
+        </a>
+        <button type="submit" class="btn btn--advertencia" style="flex: 1; background-color: #DC2626;">
+          Sí, Eliminar
+        </button>
+      </form>
+    </section>
+  </article>
+</main>
+{% endblock %}

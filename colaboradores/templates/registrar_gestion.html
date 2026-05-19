@@ -1,177 +1,118 @@
-{% extends 'principal_panel.html' %} {% block content %}
-<main
-  style="
-    display: flex;
-    justify-content: center;
-    padding-top: 20px;
-    min-height: calc(100vh - 150px);
-  "
->
-  <article
-    class="tarjeta tarjeta--edicion"
-    style="width: 100%; box-sizing: border-box; max-width: 650px"
-  >
-    <header
-      class="tarjeta__cabecera"
-      style="
-        text-align: center;
-        border-bottom: 1px solid var(--color-borde);
-        padding-bottom: 20px;
-        margin-bottom: 25px;
-      "
-    >
-      <h1
-        style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
-      >
-        Registrar Gestión de Mora
+{% extends 'principal_panel.html' %}
+
+{% block content %}
+<main style="display: flex; justify-content: center; padding-top: 20px; min-height: calc(100vh - 150px);">
+  <article class="tarjeta" style="width: 100%; box-sizing: border-box; max-width: 650px;">
+    
+    <header class="tarjeta__cabecera" style="text-align: center; border-bottom: 1px solid var(--color-borde); padding-bottom: 20px; margin-bottom: 25px;">
+      <h1 style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px;">
+        Registrar Intervención CBR
       </h1>
-      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
-        Retroalimente el sistema con el resultado de la estrategia aplicada.
+      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0;">
+        Control de cobranzas asistido por el Motor de Razonamiento Basado en Casos.
       </p>
     </header>
 
     <section class="tarjeta__cuerpo">
+
+      {% if cbr %}
+      <div style="background-color: #EFF6FF; border: 1px solid #BFDBFE; padding: 20px; border-radius: 8px; margin-bottom: 30px; box-shadow: 0 2px 4px rgba(59, 130, 246, 0.05);">
+        <h4 style="margin: 0 0 12px 0; color: #1E40AF; font-size: 1.1rem; display: flex; align-items: center; gap: 8px;">
+          🤖 Sugerencia del Sistema Experto CBR
+        </h4>
+        
+        <p style="margin: 0 0 15px 0; color: #1E3A8A; font-size: 0.95rem;">
+          Técnica recomendada: <strong style="color: #0369A1; background-color: #E0F2FE; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem; border: 1px solid #BAE6FD;">{{ cbr.recomendacion }}</strong>
+        </p>
+
+        <div style="margin-bottom: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
+            <span style="font-size: 0.85rem; color: #1E40AF; font-weight: bold;">Efectividad histórica en este perfil:</span>
+            <span style="font-size: 0.9rem; color: #1D4ED8; font-weight: 800;">{{ cbr.confianza }}%</span>
+          </div>
+          <div style="background-color: #DBEAFE; height: 10px; width: 100%; border-radius: 5px; overflow: hidden; border: 1px solid #BFDBFE;">
+            <div style="background-color: #3B82F6; height: 100%; width: {{ cbr.confianza }}%; transition: width 0.5s ease-in-out;"></div>
+          </div>
+        </div>
+
+        <small style="color: #4B5563; display: block; font-style: italic; margin-top: 8px; background-color: #FFFFFF; padding: 8px; border-radius: 4px; border-left: 3px solid #3B82F6;">
+          📌 <strong>Contexto de Análisis:</strong> {{ cbr.mensaje }}
+        </small>
+      </div>
+      {% endif %}
       <form method="POST" class="formulario-vertical">
         {% csrf_token %}
 
-        <h3
-          style="
-            font-size: 1.1rem;
-            color: var(--color-azul-primario);
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 5px;
-          "
-        >
-          1. Datos de la Intervención
+        <h3 style="font-size: 1.1rem; color: var(--color-azul-primario); margin-bottom: 15px; border-bottom: 2px solid #f1f5f9; padding-bottom: 5px;">
+          Parámetros del Registro
         </h3>
 
-        <section style="margin-bottom: 20px">
-          <label for="{{ form.cliente.id_for_label }}"
-            >Cliente Gestionado:</label
-          >
-          {{ form.cliente }}
-        </section>
+        <section style="margin-bottom: 20px;">
+  <label style="font-weight: bold; color: var(--color-negro); display: block; margin-bottom: 6px;">
+    Cliente bajo Análisis:
+  </label>
+  
+  {% if cliente %}
+    <div style="background-color: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600; color: #1E293B;">
+      👤 {{ cliente.nombres }} (CC: {{ cliente.identificacion }})
+    </div>
+    <div style="display: none !important; visibility: hidden; height: 0;">
+      {{ form.cliente }}
+    </div>
+  {% else %}
+    {{ form.cliente }}
+  {% endif %}
+</section>
 
-        <section style="margin-bottom: 30px">
-          <label for="{{ form.tecnica.id_for_label }}"
-            >Técnica de Mejora Aplicada:</label
-          >
+        <section style="margin-bottom: 20px;">
+          <label for="{{ form.tecnica.id_for_label }}" style="font-weight: bold; color: var(--color-negro);">Técnica de Mejora Aplicada:</label>
           {{ form.tecnica }}
-          <small
-            style="
-              display: block;
-              margin-top: 6px;
-              color: var(--color-gris-texto);
-              font-size: 0.85rem;
-            "
-          >
-            ℹ️ Seleccione la estrategia recomendada por el motor o la aplicada
-            manualmente.
+          <small style="display: block; margin-top: 4px; color: var(--color-gris-texto); font-size: 0.85rem;">
+            Seleccione la estrategia exacta que utilizó para contactar o negociar con el cliente.
           </small>
         </section>
 
-        <h3
-          style="
-            font-size: 1.1rem;
-            color: var(--color-azul-primario);
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 5px;
-          "
-        >
-          2. Resultados y Retroalimentación
-        </h3>
-
-        <section
-          style="
-            margin-bottom: 20px;
-            background-color: #f8fafc;
-            padding: 15px;
-            border-radius: 8px;
-            border: 1px solid var(--color-borde);
-          "
-        >
-          <label
-            for="{{ form.fue_exitosa.id_for_label }}"
-            style="
-              display: flex;
-              align-items: center;
-              gap: 12px;
-              cursor: pointer;
-              margin-bottom: 0;
-            "
-          >
-            <div style="transform: scale(1.3)">{{ form.fue_exitosa }}</div>
-            <span style="font-weight: 700; color: var(--color-negro)"
-              >¿La técnica logró regularizar al cliente?</span
-            >
-          </label>
-          <small
-            style="
-              display: block;
-              margin-top: 10px;
-              color: var(--color-gris-texto);
-              font-size: 0.85rem;
-              padding-left: 30px;
-            "
-          >
-            Marque esta casilla únicamente si el cliente normalizó su cartera o
-            realizó el pago tras esta gestión.
+        <section style="margin-bottom: 25px; background-color: #FAFAFA; padding: 15px; border-radius: 6px; border: 1px solid #E5E5E5;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            {{ form.fue_exitosa }}
+            <label for="{{ form.fue_exitosa.id_for_label }}" style="font-weight: bold; color: var(--color-negro); margin: 0; cursor: pointer;">
+              ¿La intervención fue exitosa?
+            </label>
+          </div>
+          <small style="display: block; margin-top: 6px; color: var(--color-gris-texto); font-size: 0.85rem; padding-left: 25px;">
+            Marque esta casilla únicamente si el cliente se comprometió formalmente a pagar, regularizó sus haberes o liquidó los valores vencidos durante esta gestión.
           </small>
         </section>
 
-        <section style="margin-bottom: 20px">
-          <label for="{{ form.observaciones.id_for_label }}"
-            >Observaciones de la Gestión:</label
-          >
-          {{ form.observaciones }} {% if form.observaciones.errors %}
-          <span
-            style="
-              display: block;
-              margin-top: 6px;
-              color: var(--color-error-texto);
-              font-weight: 600;
-              font-size: 0.85rem;
-            "
-          >
-            ⚠️ {{ form.observaciones.errors|first }}
-          </span>
+        <section style="margin-bottom: 20px;">
+          <label for="{{ form.observaciones.id_for_label }}" style="font-weight: bold; color: var(--color-negro);">Observaciones / Detalles de la Bitácora:</label>
+          {{ form.observaciones }}
+        </section>
+
+        <nav style="display: flex; gap: 15px; margin-top: 35px;">
+          {% if cliente %}
+            <a href="{% url 'ver_historial_cliente' cliente.id %}" class="btn btn--advertencia" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+              Cancelar
+            </a>
+          {% else %}
+            <a href="{% url 'historial_ventas' %}" class="btn btn--advertencia" style="flex: 1; text-align: center; text-decoration: none; display: flex; align-items: center; justify-content: center;">
+              Cancelar
+            </a>
           {% endif %}
-        </section>
-
-        <nav style="display: flex; gap: 15px; margin-top: 35px">
-          <a
-            href="{% url 'principal_panel' %}"
-            class="btn btn--advertencia"
-            style="flex: 1; text-align: center"
-          >
-            Cancelar
-          </a>
-          <button type="submit" class="btn btn--exito" style="flex: 2">
-            Registrar y Actualizar Scoring
+          <button type="submit" class="btn btn--exito" style="flex: 2;">
+            Guardar Gestión
           </button>
         </nav>
+
       </form>
     </section>
 
-    <footer
-      class="pie-tarjeta"
-      style="
-        background-color: #f8fafc;
-        padding: 15px;
-        border-radius: 0 0 8px 8px;
-        margin: 30px -24px -24px -24px;
-      "
-    >
-      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
-        <strong style="color: var(--color-azul-primario)"
-          >🧠 Inteligencia CBR:</strong
-        >
-        Cada registro alimenta el historial de patrones. El sistema recalculará
-        automáticamente el nivel de riesgo del cliente tras guardar.
+    <footer class="pie-tarjeta" style="background-color: #f8fafc; padding: 15px; border-radius: 0 0 8px 8px; margin: 30px -24px -24px -24px; border-top: 1px solid var(--color-borde);">
+      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem;">
+        <strong style="color: var(--color-azul-primario);">Ciclo de Vida CBR:</strong> Al guardar la operación, este registro se asimila de inmediato en la memoria histórica, optimizando los porcentajes de efectividad para futuras recomendaciones analíticas del Core.
       </p>
     </footer>
+
   </article>
 </main>
 {% endblock %}
