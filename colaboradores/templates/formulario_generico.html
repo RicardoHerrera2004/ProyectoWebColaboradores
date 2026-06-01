@@ -83,4 +83,35 @@
     </section>
   </article>
 </main>
+
+
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // Buscamos los elementos en el HTML
+        const checkboxHijos = document.getElementById("id_tiene_hijos");
+        const inputNumeroHijos = document.getElementById("id_numero_hijos");
+
+        // Solo ejecutamos la lógica si AMBOS elementos existen en la página actual
+        if (checkboxHijos && inputNumeroHijos) {
+            
+            function toggleInputHijos() {
+                if (checkboxHijos.checked) {
+                    // Habilitamos y le quitamos cualquier opacidad rara si tu CSS lo tiene
+                    inputNumeroHijos.readOnly = false;
+                    inputNumeroHijos.style.opacity = "1";
+                } else {
+                    // Bloqueamos y enceramos
+                    inputNumeroHijos.readOnly = true;
+                    inputNumeroHijos.value = 0;
+                    inputNumeroHijos.style.opacity = "0.5"; // Un toque visual para que se note más que está bloqueado
+                }
+            }
+
+            // Ejecutamos al cargar y escuchamos los clics
+            toggleInputHijos();
+            checkboxHijos.addEventListener("change", toggleInputHijos);
+        }
+    });
+</script>
+
 {% endblock %}

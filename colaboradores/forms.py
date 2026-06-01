@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
-from .models import Cliente, CategoriaRiesgo, Diferido, Producto, TecnicaMejora, HistorialGestion, Venta, Vendedor
+from .models import Cliente, CategoriaRiesgo, Diferido, PerfilSocioeconomico, Producto, TecnicaMejora, HistorialGestion, Venta, Vendedor
 
 # ---------------------------------------------------------
 # 1. FORMULARIO DE CLIENTE
@@ -125,9 +125,18 @@ class HistorialGestionForm(forms.ModelForm):
 
 
 # ---------------------------------------------------------
-# 6. FORMULARIO DE VENTA (Para aplicar las reglas del PDF)
+# 6. FORMULARIO DE VENTA
 # ---------------------------------------------------------
+
 class VentaForm(forms.ModelForm):
+    # 1. Definimos 'producto' como un campo extra, FUERA de la clase Meta.
+    # Así Django sabe que debe mostrarlo en el HTML, pero no intentará guardarlo directamente en Venta.
+    producto = forms.ModelChoiceField(
+        queryset=Producto.objects.all(),
+        required=False, # Ponlo en True si es obligatorio seleccionar un producto inicial
+        widget=forms.Select(attrs={'class': 'form-select'})
+    )
+    
     fecha_manual = forms.DateTimeField(
         required=False,
         widget=forms.DateTimeInput(attrs={
@@ -140,23 +149,24 @@ class VentaForm(forms.ModelForm):
     
     class Meta:
         model = Venta
-        fields = ['colaborador', 'cliente', 'diferido', 'estado_pago', 'producto', 'total_pagar', 'descripcion_venta', 'fecha_manual']
+        # 2. BORRAMOS 'producto' de esta lista porque no pertenece al modelo Venta
+        fields = ['colaborador', 'cliente', 'diferido', 'estado_pago', 'total_pagar', 'descripcion_venta', 'fecha_manual']
         widgets = {
             'colaborador': forms.Select(attrs={'class': 'form-select'}),
             'cliente': forms.Select(attrs={'class': 'form-select'}),
             'diferido': forms.Select(attrs={'class': 'form-select'}), # Este dropdown se llenará vía AJAX
             'estado_pago': forms.Select(attrs={'class': 'form-select'}),
-            'producto': forms.Select(attrs={'class': 'form-select'}),
+            # 3. Borramos el widget de producto de aquí también
             'total_pagar': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
             'descripcion_venta': forms.Textarea(attrs={'class': 'form-control', 'rows': 3}),
         }
         
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        # Recorremos los productos y les agregamos el atributo data-precio en el HTML
+        
+        # Este ciclo añade el precio de la DB a la etiqueta HTML <option>
+        # Ahora funcionará perfectamente porque 'producto' está definido arriba
         if 'producto' in self.fields:
-            self.fields['producto'].queryset = Producto.objects.all()
-            # Este ciclo añade el precio de la DB a la etiqueta HTML <option>
             self.fields['producto'].widget.choices = [
                 (p.id, p.nombre) for p in Producto.objects.all()
             ]
@@ -236,3 +246,25 @@ class EditarVendedorForm(forms.ModelForm):
         if commit:
             vendedor.save()
         return vendedor
+    
+# ==============================================
+# 8. FORMULARIO DE PERFIL SOCIOECONOMICO
+# ==============================================
+
+class PerfilSocioeconomicoForm(forms.ModelForm):
+    class Meta:
+        model = PerfilSocioeconomico
+        fields = [
+            'estado_civil',
+            'tiene_hijos',
+            'numero_hijos', 
+            'tipo_trabajo',
+            'ingreso_mensual',
+            'gastos_fijos_estimados',
+            'nivel_estudio'
+        ]
+        
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        for field in self.fields.values():
+            field.widget.attrs.update({'class': 'form-control'})

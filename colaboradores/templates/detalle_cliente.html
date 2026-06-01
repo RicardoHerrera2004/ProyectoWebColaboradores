@@ -1,0 +1,105 @@
+{% extends 'principal_panel.html' %}
+
+{% block content %}
+
+
+
+<div class="contenedor">
+    
+    <div class="tarjeta tarjeta--creacion">
+        <div class="tarjeta__cabecera">
+            <h2>Expediente de Riesgo: {{ analisis.cliente.nombres }}</h2>
+        </div>
+        <div class="tarjeta__cuerpo">
+            <p style="font-size: 1.1rem;">
+                <strong>Identificación:</strong> {{ analisis.cliente.identificacion }} | 
+                <strong>Mora Total Activa:</strong> <span style="color: var(--color-error-texto); font-weight: bold;">${{ analisis.monto_total_mora }}</span>
+            </p>
+            <div class="alerta" style="background-color: #F8FAFC; border: 1px solid var(--color-borde); text-align: left; margin-top: 15px;">
+                💡 <strong>Resumen del Sistema:</strong> {{ analisis.resumen_ejecutivo }}
+            </div>
+        </div>
+    </div>
+
+    <div class="grid-analitico">
+        
+        <div class="tarjeta">
+            <div class="tarjeta__cabecera">
+                <h3>Radiografía Financiera Actual</h3>
+            </div>
+            <div class="tarjeta__cuerpo" style="text-align: center;">
+                
+                <span class="progreso-circular">{{ analisis.perfil_riesgo.score_porcentaje }}%</span>
+                <p><strong>Categoría de Riesgo:</strong> {{ analisis.perfil_riesgo.categoria_sugerida }}</p>
+                <p style="font-size: 0.85rem; color: var(--color-gris-texto);">Nivel de Confianza de los Datos: {{ analisis.perfil_riesgo.confianza|floatformat:2 }}</p>
+                
+                <hr style="border: 0; border-top: 1px solid var(--color-borde); margin: 20px 0;">
+                
+                <p style="text-align: left; font-weight: 600;">Desglose de Factores Matemáticos:</p>
+                <ul style="text-align: left; font-size: 0.9rem; color: var(--color-gris-texto); margin-top: 10px;">
+                    {% for nombre_factor, valor in analisis.perfil_riesgo.factores.items %}
+                        <li style="margin-bottom: 5px;">
+                            <strong style="text-transform: capitalize;">{{ nombre_factor }}:</strong> {{ valor }}
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+
+        <div class="tarjeta tarjeta--oscura">
+            <div class="tarjeta__cabecera">
+                <h3>🧠 Inteligencia Predictiva (CBR)</h3>
+            </div>
+            <div class="tarjeta__cuerpo">
+                
+                {% if analisis.tecnicas_recomendadas %}
+                    {% with recomendacion=analisis.tecnicas_recomendadas.0 %}
+                        
+                        <p style="font-size: 0.9rem; margin-bottom: 15px;">Técnica de cobranza sugerida para este perfil:</p>
+                        
+                        <div class="caja-resaltada">
+                            <h4 style="margin: 0 0 10px 0; font-size: 1.2rem;">{{ recomendacion.tecnica.nombre }}</h4>
+                            <p style="font-size: 0.95rem; margin: 0; color: #E2E8F0;">
+                                {{ recomendacion.tecnica.descripcion }}
+                            </p>
+                        </div>
+                        
+                        <div style="margin-top: 20px;">
+                            <p style="margin-bottom: 5px;"><strong>Similitud con Casos Exitosos:</strong> {{ recomendacion.confianza|floatformat:2 }}%</p>
+                            <p style="font-size: 0.85rem; color: #94A3B8;">{{ recomendacion.razonamiento }}</p>
+                        </div>
+                    {% endwith %}
+                
+                {% else %}
+                    <div class="caja-resaltada" style="border-color: rgba(255, 255, 255, 0.1);">
+                        <p style="text-align: center; color: #94A3B8; margin: 0;">
+                            Aún no hay suficientes gestiones de cobro exitosas registradas en el sistema para buscar "clientes gemelos" y emitir una recomendación.
+                        </p>
+                    </div>
+                {% endif %}
+                
+            </div>
+            
+            <div class="pie-tarjeta" style="margin-top: auto; border-top-color: rgba(255, 255, 255, 0.1);">
+                <a href="{% url 'registrar_gestion_mora' %}?cliente_id={{ analisis.cliente.id }}" class="btn btn--exito btn--bloque" style="background-color: var(--color-oro); color: var(--color-azul-nav);">
+                    Aplicar Gestión Recomendada
+                </a>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="tarjeta" style="margin-top: 24px;">
+        <div class="tarjeta__acciones" style="justify-content: space-between; border: none; padding-top: 0;">
+            <a href="{% url 'lista_clientes' %}" class="btn btn--advertencia">
+                ⬅ Volver a Cartera
+            </a>
+            <a href="{% url 'ver_historial_cliente' analisis.cliente.id %}" class="btn btn--exito" style="background-color: var(--color-negro);">
+                📄 Ver Historial de Gestiones
+            </a>
+        </div>
+    </div>
+
+</div>
+
+{% endblock %}

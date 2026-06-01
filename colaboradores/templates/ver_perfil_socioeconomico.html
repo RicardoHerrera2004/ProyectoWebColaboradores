@@ -1,0 +1,44 @@
+{% extends 'principal_panel.html' %} 
+{% block content %}
+<div class="card shadow">
+    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+        <h4 class="mb-0">Perfil Socioeconómico: {{ cliente.nombres }}</h4>
+        <a href="{% url 'lista_clientes' %}" class="btn btn-sm btn-light">Volver a Clientes</a>
+    </div>
+    
+    <div class="card-body">
+        {% if tiene_perfil %}
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <p style="margin-bottom: 15px;">
+                        <strong>Estado Civil:</strong> {{ cliente.perfil_socioeconomico.get_estado_civil_display }}
+                    </p>
+                    <p>
+                        <strong>Número de Hijos:</strong> {{ cliente.perfil_socioeconomico.numero_hijos }}</p>
+                    <p><strong>Tipo de Trabajo:</strong> {{ cliente.perfil_socioeconomico.get_tipo_trabajo_display }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Ingreso Mensual:</strong> ${{ cliente.perfil_socioeconomico.ingreso_mensual }}</p>
+                    <p><strong>Gastos Fijos:</strong> ${{ cliente.perfil_socioeconomico.gastos_fijos_estimados }}</p>
+                    <p><strong>Nivel de Estudio:</strong> {{ cliente.perfil_socioeconomico.get_nivel_estudio_display }}</p>
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <a href="{% url 'actualizar_perfil' cliente.id %}" class="btn btn-warning">Editar Perfil</a>
+                
+                <form action="{% url 'eliminar_perfil' cliente.id %}" method="POST" onsubmit="return confirm('¿Estás seguro de que deseas eliminar este perfil? Esta acción no se puede deshacer.');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-danger">Eliminar Perfil</button>
+                </form>
+            </div>
+
+        {% else %}
+            <div class="alert alert-info text-center">
+                <p>Este cliente aún no tiene un perfil socioeconómico registrado.</p>
+                <a href="{% url 'actualizar_perfil' cliente.id %}" class="btn btn-success">Crear Perfil Ahora</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

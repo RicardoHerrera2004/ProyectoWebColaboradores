@@ -1,0 +1,138 @@
+{% extends 'principal_panel.html' %} 
+
+{% block content %}
+
+<main class = "contenedor">
+
+    {% if request.user.is_staff %}
+
+    <section class="tarjeta tarjeta--creacion" style="width: 100%; box-sizing: border-box; max-width: 800px; margin: 40px auto;">
+        <header class="tarjeta__cabecera" style="text-align: center; border-bottom: 1px solid var(--color-borde); padding-bottom: 20px; margin-bottom: 25px;">
+            <h1 style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px;">
+                Catálogo de Productos
+            </h1>
+            <h2 style="margin: 0;">
+                Agregar nuevo producto
+            </h2>    
+        </header>
+        <form action="{%url 'crear_producto' %}" method="POST" class="formulario-horizontal">
+            
+            {% csrf_token %}
+
+            <fieldset style="border: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end;">
+        
+                <div class="campo">
+                    <label for="sku" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">SKU</label>
+                    <input type="text" name="sku" id="sku" placeholder="Ej: OLLA-01" required />
+                </div>
+        
+                <div class="campo" style="grid-column: span 2;">
+                    <label for="nombre" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Nombre Comercial</label>
+                    <input type="text" name="nombre" id="nombre" placeholder="Nombre completo del producto" required />
+                </div>
+        
+                <div class="campo">
+                    <label for="tipo" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Categoría</label>
+                    <select name="tipo" id="tipo" required>
+                        <option value="OLLA">Olla Individual</option>
+                        <option value="SET">Set Completo</option>
+                        <option value="REPUESTO">Repuesto</option>
+                    </select>
+                </div>
+        
+                <div class="campo">
+                    <label for="precio" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Precio Base ($)</label>
+                    <input type="number" name="precio" id="precio" placeholder="0.00" step="0.01" required />
+                </div>
+        
+                <div class="campo">
+                    <label for="stock" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Stock Inical</label>
+                    <input type="number" name="stock" id="stock" placeholder="0" required />
+                </div>
+        
+                <button type="submit" class="btn btn--exito" style="height: 44px;">
+                    Guardar
+                </button>
+            </fieldset>
+        </form>
+    </section>
+
+    {% endif %}
+
+    <section class="catalogo">
+        <header style="margin-bottom: 20px; border-bottom: 2px solid var(--color-borde); padding-bottom: 10px;">
+            <h2 style="font-size: 1.8rem; color: var(--color-negro); margin: 0;">
+                Catálogo de Productos Activos
+            </h2>
+        </header>
+
+        <ul class="grid-productos">
+      
+            {% for producto in productos %}
+
+            <li class="tarjeta">
+                <article style="display: flex; flex-direction: column; height: 100%">
+          
+                    <header class="tarjeta__cabecera" style="border-bottom: none; padding-bottom: 0;">
+                        <h3 style="margin: 0 0 10px 0; font-size: 1.3rem; color: var(--color-azul-nav);">
+                            {{ producto.nombre }}
+                        </h3>
+                        <span style="background-color: #f1f5f9; color: var(--color-gris-texto); padding: 4px 8px; border-radius: 4px; font-size: 0.8rem; font-weight: bold;">
+                            {{ producto.get_tipo_display }} | SKU: {{ producto.codigo_sku }} 
+                        </span>
+                    </header>
+
+                    <section class="tarjeta__cuerpo" style="margin-top: 20px; flex-grow: 1;">
+                        <div style="background-color: #F8FAFC; padding: 15px; border-radius: 8px; border: 1px solid var(--color-borde);">
+                            <p style="margin: 0 0 10px 0; font-size: 1.1rem;">
+                                <span style="color: var(--color-gris-texto); font-size: 0.9rem;">Precio Base:</span><br>
+                                <strong>
+                                    ${{ producto.precio }}
+                                </strong>
+                            </p>
+                            <p style="margin: 0; font-size: 1.1rem;">
+                                <span style="color: var(--color-gris-texto); font-size: 0.9rem;">Stock Disponible:</span><br>
+                                <strong style="color: {% if producto.stock < 10 %}var(--color-error-texto){% else %}#166534{% endif %};">
+                                    {{ producto.stock }} unidades
+                                </strong>
+                            </p>
+                        </div>
+                    </section>
+
+                    {% if request.user.is_staff %}
+
+                    <footer class="tarjeta__acciones" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid var(--color-borde);">
+                        <a href="{% url 'editar_producto' producto.id %}" class="btn btn--advertencia" style="flex: 1; text-align: center;">
+                            Editar
+                        </a>
+            
+                        <form action="{% url 'eliminar_producto' producto.id %}" method="POST" style="flex: 1; display: flex" onsubmit="return confirm('¿Seguro que deseas eliminar el producto {{ producto.nombre }} del catálogo?');">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn--peligro" style="width: 100%">
+                                Borrar
+                            </button>
+                        </form>
+                    </footer>
+
+                {% endif %}
+          
+                </article>
+            </li>
+
+            {% empty %}
+
+            <li class="tarjeta" style="grid-column: 1 / -1; text-align: center; padding: 60px 20px; background-color: #F8FAFC; border: 2px dashed var(--color-borde);">
+                <span style="font-size: 3rem; margin-bottom: 15px; display: block;">📦</span>
+                <h3 style="color: var(--color-negro); margin-bottom: 5px;">El catálogo está vacío</h3>
+                <p style="color: var(--color-gris-texto); font-size: 1.1rem; margin: 0;">
+                    No hay productos registrados aún en el sistema. Utiliza el formulario superior para agregar el primero.
+                </p>
+            </li>
+            
+        {% endfor %}
+      
+        </ul>
+    </section>
+
+</main>
+{% endblock %}
