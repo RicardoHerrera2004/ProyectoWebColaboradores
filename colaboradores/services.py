@@ -241,7 +241,7 @@ class CBREngine:
     
         ingreso_norm = min(float(perfil.ingreso_mensual or 0) / 3000.0, 1.0)  # Normalizamos a un máximo de $3000
     
-        cargas_norm = min(float(perfil.numero_hijos or 0) / 5.0, 1.0)  # Normalizamos a un máximo de 5 cargas
+        cargas_norm = min(perfil.numero_hijos / 5.0, 1.0)     # Normalizamos a un máximo de 5 cargas
     
         mapa_estudios = {
             'PRIMARIA': 0.25,
@@ -338,7 +338,7 @@ class CBREngine:
         
         return RecomendacionTecnica(
             tecnica=tecnica_ganadora,
-            confianza=round(similitud_promedio, 4),
+            confianza=round(similitud_promedio * 100, 2),
             tasa_exito_historica = 0.0,
             casos_similares_usados=len(top_3_gemelos),
             razonamiento=f'La técnica "{tecnica_ganadora.nombre}" fue la más exitosa entre los casos similares encontrados, con una similitud promedio de {round(similitud_promedio * 100, 2)}% con el cliente actual.'
@@ -384,42 +384,6 @@ class GeneradorAnalisis:
             resumen_ejecutivo=resumen
         )
         
-# Instancia motor CBR
-
-def procesar_cliente(self, cliente: Cliente) -> AnalisisCompleto:
-        
-        perfil_riesgo = self.scoring_engine.calcular(cliente)
-        tecnica_recomendada = self.cbr_engine.recomendar_estrategia(cliente)
-        lista_tecnicas = [tecnica_recomendada] if tecnica_recomendada else []
-        ventas_activas = cliente.compras_realizadas.filter(estado_pago__in=['PENDIENTE', 'EN_MORA'])
-        monto_mora = sum(venta.total_pagar for venta in ventas_activas if venta.estado_pago == 'EN_MORA')
-        resumen = (
-            f"El cliente {cliente.nombres} presenta un perfil de riesgo {perfil_riesgo.categoria_sugerida} con un score del {perfil_riesgo.score_porcentaje}%. "
-        )
-        
-        # 1. CALCULAR EL VECTOR ANTES DEL RETURN (Alineado correctamente a la derecha)
-        motor_cbr = CBREngine()
-        vector_crudo = motor_cbr._vectorizar_perfil(cliente)
-        
-        vector_cbr_diccionario = {
-            'Ingresos Normalizados': vector_crudo[0],
-            'Cargas Familiares': vector_crudo[1],
-            'Nivel Educativo': vector_crudo[2],
-            'Estado Civil': vector_crudo[3]
-        }
-
-        # EL RETURN FINAL
-        return AnalisisCompleto(
-            cliente=cliente,
-            perfil_riesgo=perfil_riesgo,
-            tecnicas_recomendadas=lista_tecnicas,
-            diferidos_recomendados=[],
-            productos_recomendados=[],
-            monto_total_mora=Decimal(monto_mora),
-            resumen_ejecutivo=resumen,
-            vector_cbr=vector_cbr_diccionario  
-        )
-
         
 # ======================================================
 # FUNCION FANTASMA PARA LAS COMISIONES MAS ADELANTE
