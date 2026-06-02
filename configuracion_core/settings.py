@@ -132,3 +132,9 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 LOGIN_URL = 'login_usuario' 
 LOGIN_REDIRECT_URL = 'principal_panel'
 LOGOUT_REDIRECT_URL = 'login_usuario'
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://proyectowebcolaboradores.onrender.com',
+]
+
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
