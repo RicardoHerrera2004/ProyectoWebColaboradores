@@ -22,21 +22,21 @@
         </h3>
 
         <section style="margin-bottom: 20px;">
-  <label style="font-weight: bold; color: var(--color-negro); display: block; margin-bottom: 6px;">
-    Cliente bajo Análisis:
-  </label>
-  
-  {% if cliente %}
-    <div style="background-color: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600; color: #1E293B;">
-      👤 {{ cliente.nombres }} (CC: {{ cliente.identificacion }})
-    </div>
-    <div style="display: none !important; visibility: hidden; height: 0;">
-      {{ form.cliente }}
-    </div>
-  {% else %}
-    {{ form.cliente }}
-  {% endif %}
-</section>
+          <label style="font-weight: bold; color: var(--color-negro); display: block; margin-bottom: 6px;">
+            Cliente bajo Análisis:
+          </label>
+          
+          {% if cliente %}
+            <div style="background-color: #F8FAFC; padding: 12px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: 600; color: #1E293B;">
+              👤 {{ cliente.nombres }} (CC: {{ cliente.identificacion }})
+            </div>
+            
+            <input type="hidden" name="cliente" value="{{ cliente.id }}">
+          {% else %}
+            {{ form.cliente }}
+          {% endif %}
+        </section>
+
 
         <section style="margin-bottom: 20px;">
           <label for="{{ form.tecnica.id_for_label }}" style="font-weight: bold; color: var(--color-negro);">Técnica de Mejora Aplicada:</label>

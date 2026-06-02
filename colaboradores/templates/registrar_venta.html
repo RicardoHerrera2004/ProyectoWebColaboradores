@@ -35,7 +35,8 @@
             <div style="background-color: #F8FAFC; padding: 10px; border-radius: 6px; border: 1px solid #E2E8F0; font-weight: bold; color: var(--color-texto);">
               👤 {{ request.user.username|title }}
             </div>
-            <div style="display: none;">{{ form.colaborador }}</div>
+            
+            <input type="hidden" name="colaborador" value="{{ request.user.vendedor.id }}">
           {% endif %}
         </section>
 

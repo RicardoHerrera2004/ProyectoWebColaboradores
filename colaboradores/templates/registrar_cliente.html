@@ -77,11 +77,17 @@
           </small>
         </section>
 
+        {% if form.non_field_errors %}
+        <div style="color: red; font-weight: bold; margin-bottom: 15px;">
+          {{ form.non_field_errors }}
+        </div>
+        {% endif %}
+
         <section style="margin-bottom: 30px">
           <label for="{{ form.nombres.id_for_label }}"
             >Nombres y Apellidos Completos:</label
           >
-          {{ form.nombres }}
+          {{ form.nombres.errors|first }}
         </section>
 
         <h3
@@ -100,7 +106,7 @@
           <label for="{{ form.categoria_riesgo.id_for_label }}"
             >Categoría de Riesgo Inicial:</label
           >
-          {{ form.categoria_riesgo }}
+          {{ form.categoria_riesgo.errors|first }}
           <small
             style="
               display: block;
