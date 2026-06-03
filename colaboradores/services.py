@@ -1,5 +1,5 @@
 from dataclasses import dataclass
-from decimal import Decimal
+from decimal import Decimal, ROUND_HALF_UP
 from typing import Optional
 from django.db.models import Count
 from django.core.exceptions import ObjectDoesNotExist
@@ -384,20 +384,9 @@ class GeneradorAnalisis:
             resumen_ejecutivo=resumen
         )
         
-        
-# ======================================================
-# FUNCION FANTASMA PARA LAS COMISIONES MAS ADELANTE
-# ======================================================
 
-def calcular_comision_vendedor(venta_editada) -> Decimal:
-    # 5% de comisión estándar)
-    porcentaje_comision = Decimal('0.05') 
-    
-    if venta_editada.total_pagar and venta_editada.colaborador:
-        
-        comision_final = venta_editada.total_pagar * porcentaje_comision
-        venta_editada.comision_calculada = comision_final
-        venta_editada.save()        
-        return comision_final
-        
-    return Decimal('0.00')
+# Calculo de comisiones en base a los porcentaje_intereses de los diferidos, para incentivar a los vendedores a ofrecer diferidos con mejores condiciones a los clientes
+def calcular_comision_vendedor_diferidos(venta) -> Decimal:
+    calculo_porcentaje_diferido = venta.diferido.porcentaje_interes if venta.diferido else 0
+    comision = Decimal(calculo_porcentaje_diferido) * Decimal(venta.total_pagar) 
+    return comision.quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)

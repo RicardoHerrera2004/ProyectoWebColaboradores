@@ -1,0 +1,75 @@
+{% extends 'principal_panel.html' %} 
+{% block content %}
+
+<main style="padding: 20px; max-width: 900px; margin: 0 auto;">
+  <header class="cabecera-seccion" style="margin-bottom: 30px">
+    <h1 style="font-size: 1.8rem; color: var(--color-negro);">Ventas por Cliente</h1>
+    <p style="color: var(--color-gris-texto);">
+      Historial de ventas registradas para {{ cliente.nombres }}.
+    </p>
+  </header>
+
+  <article class="tarjeta">
+    <header class="tarjeta__cabecera" style="margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; gap: 15px; flex-wrap: wrap;">
+      <h2 style="font-size: 1.4rem;">{{ cliente.nombres }}</h2>
+      <a href="{% url 'lista_clientes' %}" class="btn btn--advertencia" style="text-decoration: none;">
+        Volver a Clientes
+      </a>
+    </header>
+
+    {% if ventas %}
+      <table class="tabla-gestion">
+        <thead>
+          <tr>
+            <th>ID / Fecha</th>
+            <th>Descripción</th>
+            <th>Financiamiento</th>
+            <th>Porcentaje</th>
+            <th>Total</th>
+            <th>Estado</th>
+            <th>Interés</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for venta in ventas %}
+            <tr>
+              <td>
+                <strong>#{{ venta.id }}</strong>
+                <div style="font-size: 0.85rem; color: var(--color-gris-texto);">
+                  {{ venta.fecha_emision|date:"d/m/Y" }}
+                </div>
+              </td>
+              <td>{{ venta.descripcion_venta|default:"Sin descripción" }}</td>
+              <td>
+                {% if venta.diferido %}
+                  {{ venta.diferido.meses_plazo }} meses
+                {% else %}
+                  Al contado
+                {% endif %}
+              </td>
+                <td>
+                    {% if venta.diferido %}
+                    {{ venta.diferido.porcentaje_interes }}
+                    {% else %}
+                    0%
+                    {% endif %}
+                </td>
+
+              <td><strong>${{ venta.total_pagar|floatformat:2 }}</strong></td>
+              <td>{{ venta.get_estado_pago_display }}</td>
+              <td>
+                <strong>
+                    Interes: ${{ venta.comision_calculada|floatformat:2 }}
+                </strong>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    {% else %}
+      <p style="color: var(--color-gris-texto);">No hay ventas registradas para este cliente.</p>
+    {% endif %}
+  </article>
+</main>
+
+{% endblock %}

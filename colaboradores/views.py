@@ -13,7 +13,7 @@ from .models import (Producto, Venta, Vendedor, Cliente, CategoriaRiesgo, Diferi
 from .forms import (ClienteForm, CategoriaRiesgoForm, DiferidoForm, TecnicaMejoraForm, HistorialGestionForm, VentaForm, CrearVendedorForm, EditarVendedorForm, PerfilSocioeconomicoForm)
 
 # Importamos solo los servicios vigentes (Tu nuevo Facade de IA y los cálculos financieros)
-from .services import calcular_comision_vendedor, GeneradorAnalisis, calcular_comision_vendedor
+from .services import GeneradorAnalisis, calcular_comision_vendedor_diferidos
 
 
 # ==========================================
@@ -127,7 +127,7 @@ def registrar_venta(request):
                 messages.error(request, 'Tu usuario no tiene un perfil de vendedor asignado.')
                 return redirect('principal_panel')
             
-            comision = calcular_comision_vendedor(nueva_venta)
+            comision = calcular_comision_vendedor_diferidos(nueva_venta)
             nueva_venta.comision_calculada = comision
             
             fecha_retroactiva = form.cleaned_data.get('fecha_manual')
@@ -151,8 +151,8 @@ def editar_venta(request, pk):
         form = VentaForm(request.POST, instance=venta)
         if form.is_valid():
             venta_editada = form.save(commit=False)
-            comision = calcular_comision_vendedor(venta_editada)
-            venta_editada.comision_ganada = comision
+            comision = calcular_comision_vendedor_diferidos(venta_editada)
+            venta_editada.comision_calculada = comision
             venta_editada.save() 
             
             fecha_retroactiva = form.cleaned_data.get('fecha_manual')
@@ -667,3 +667,20 @@ def ajax_obtener_precio_producto(request):
         return JsonResponse({'precio': str(producto.precio)})
     except Producto.DoesNotExist:
         return JsonResponse({'precio': '0.00'})
+
+    
+@login_required
+def ventas_por_cliente(request, cliente_id):
+    cliente = get_object_or_404(Cliente, id=cliente_id)
+    ventas = Venta.objects.select_related('diferido', 'colaborador').filter(cliente=cliente).order_by('-fecha_emision')
+    intereses = Venta.comision_calculada 
+    
+    
+    contexto = {
+        'cliente': cliente,
+        'ventas': ventas,
+        'titulo': f'Ventas Detalladas: {cliente.nombres}',
+        'interes': intereses
+    }
+    
+    return render(request, 'ver_ventas_cliente.html', contexto)
