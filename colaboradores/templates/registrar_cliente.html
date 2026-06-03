@@ -107,20 +107,16 @@
 
           <section style="margin-bottom: 20px">
             <label for="{{ form.categoria_riesgo.id_for_label }}"
-              >Categoría de Riesgo Inicial:</label
-            >
+              >Categoría de Riesgo Inicial:</label>
+            {{ form.categoria_riesgo }}
+          
+          <span style="color: var(--color-error-texto); font-size: 0.85rem; font-weight: 600; display: block; margin-top: 5px;">
             {{ form.categoria_riesgo.errors|first }}
-            <small
-              style="
-                display: block;
-                margin-top: 6px;
-                color: var(--color-gris-texto);
-                font-size: 0.85rem;
-              "
-            >
-              Esta categoría condicionará los planes diferidos disponibles en
-              el módulo de ventas.
-            </small>
+          </span>
+          
+          <small style="display: block; margin-top: 6px; color: var(--color-gris-texto); font-size: 0.85rem;">
+            Esta categoría condicionará los planes diferidos disponibles en el módulo de ventas.
+          </small>
           </section>
 
           <nav style="display: flex; gap: 15px; margin-top: 35px">
