@@ -1,157 +1,160 @@
-{% extends 'principal_panel.html' %} {% block content %}
-<main
-  style="
-    display: flex;
-    justify-content: center;
-    padding-top: 20px;
-    min-height: calc(100vh - 150px);
-  "
->
-  <article
-    class="tarjeta tarjeta--edicion"
-    style="width: 100%; box-sizing: border-box; max-width: 600px"
+  {% extends 'principal_panel.html' %} {% block content %}
+  <main
+    style="
+      display: flex;
+      justify-content: center;
+      padding-top: 20px;
+      min-height: calc(100vh - 150px);
+    "
   >
-    <header
-      class="tarjeta__cabecera"
-      style="
-        text-align: center;
-        border-bottom: 1px solid var(--color-borde);
-        padding-bottom: 20px;
-        margin-bottom: 25px;
-      "
+    <article
+      class="tarjeta tarjeta--edicion"
+      style="width: 100%; box-sizing: border-box; max-width: 600px"
     >
-      <h1
-        style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
+      <header
+        class="tarjeta__cabecera"
+        style="
+          text-align: center;
+          border-bottom: 1px solid var(--color-borde);
+          padding-bottom: 20px;
+          margin-bottom: 25px;
+        "
       >
-        Registro de Nuevo Cliente
-      </h1>
-      <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
-        Ingrese los datos para la evaluación inicial de riesgo crediticio.
-      </p>
-    </header>
-
-    <section class="tarjeta__cuerpo">
-      <form method="POST" class="formulario-vertical">
-        {% csrf_token %}
-
-        <h3
-          style="
-            font-size: 1.1rem;
-            color: var(--color-azul-primario);
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 5px;
-          "
+        <h1
+          style="font-size: 1.6rem; color: var(--color-negro); margin-bottom: 5px"
         >
-          1. Información Identitaria
-        </h3>
+          Registro de Nuevo Cliente
+        </h1>
+        <p style="color: var(--color-gris-texto); font-size: 0.95rem; margin: 0">
+          Ingrese los datos para la evaluación inicial de riesgo crediticio.
+        </p>
+      </header>
 
-        <section style="margin-bottom: 20px">
-          <label for="{{ form.identificacion.id_for_label }}"
-            >Número de Cédula (Dato Sensible):</label
-          >
-          {{ form.identificacion }} {% if form.identificacion.errors %}
-          <span
+      <section class="tarjeta__cuerpo">
+        <form method="POST" class="formulario-vertical">
+          {% csrf_token %}
+
+          <h3
             style="
-              display: block;
-              margin-top: 6px;
-              color: var(--color-error-texto);
-              font-weight: 600;
-              font-size: 0.85rem;
+              font-size: 1.1rem;
+              color: var(--color-azul-primario);
+              margin-bottom: 15px;
+              border-bottom: 2px solid #f1f5f9;
+              padding-bottom: 5px;
             "
           >
-            ⚠️ {{ form.identificacion.errors|first }}
-          </span>
+            1. Información Identitaria
+          </h3>
+
+          <section style="margin-bottom: 20px">
+            <label for="{{ form.identificacion.id_for_label }}"
+              >Número de Cédula (Dato Sensible):</label
+            >
+            {{ form.identificacion }} {% if form.identificacion.errors %}
+            <span
+              style="
+                display: block;
+                margin-top: 6px;
+                color: var(--color-error-texto);
+                font-weight: 600;
+                font-size: 0.85rem;
+              "
+            >
+              ⚠️ {{ form.identificacion.errors|first }}
+            </span>
+            {% endif %}
+
+            <small
+              style="
+                display: block;
+                margin-top: 6px;
+                color: var(--color-gris-texto);
+                font-size: 0.85rem;
+              "
+            >
+              ℹ️ La cédula será validada mediante algoritmos de provincia y
+              longitud en el servidor.
+            </small>
+          </section>
+
+          {% if form.non_field_errors %}
+          <div style="color: red; font-weight: bold; margin-bottom: 15px;">
+            {{ form.non_field_errors }}
+          </div>
           {% endif %}
 
-          <small
+          <section style="margin-bottom: 30px">
+            <label for="{{ form.nombres.id_for_label }}"
+              >Nombres y Apellidos Completos:</label
+            >
+            {{ form.nombres }}
+            <span style="color: var(--color-error-texto); font-size: 0.85rem; font-weight: 600; display: block; margin-top: 5px;">
+              {{ form.nombres.errors|first }}
+            </span>
+          </section>
+
+          <h3
             style="
-              display: block;
-              margin-top: 6px;
-              color: var(--color-gris-texto);
-              font-size: 0.85rem;
+              font-size: 1.1rem;
+              color: var(--color-azul-primario);
+              margin-bottom: 15px;
+              border-bottom: 2px solid #f1f5f9;
+              padding-bottom: 5px;
             "
           >
-            ℹ️ La cédula será validada mediante algoritmos de provincia y
-            longitud en el servidor.
-          </small>
-        </section>
+            2. Clasificación de Cartera
+          </h3>
 
-        {% if form.non_field_errors %}
-        <div style="color: red; font-weight: bold; margin-bottom: 15px;">
-          {{ form.non_field_errors }}
-        </div>
-        {% endif %}
+          <section style="margin-bottom: 20px">
+            <label for="{{ form.categoria_riesgo.id_for_label }}"
+              >Categoría de Riesgo Inicial:</label
+            >
+            {{ form.categoria_riesgo.errors|first }}
+            <small
+              style="
+                display: block;
+                margin-top: 6px;
+                color: var(--color-gris-texto);
+                font-size: 0.85rem;
+              "
+            >
+              Esta categoría condicionará los planes diferidos disponibles en
+              el módulo de ventas.
+            </small>
+          </section>
 
-        <section style="margin-bottom: 30px">
-          <label for="{{ form.nombres.id_for_label }}"
-            >Nombres y Apellidos Completos:</label
+          <nav style="display: flex; gap: 15px; margin-top: 35px">
+            <a
+              href="{% url 'principal_panel' %}"
+              class="btn btn--advertencia"
+              style="flex: 1; text-align: center"
+            >
+              Cancelar
+            </a>
+            <button type="submit" class="btn btn--exito" style="flex: 2">
+              Registrar Cliente en el Core
+            </button>
+          </nav>
+        </form>
+      </section>
+
+      <footer
+        class="pie-tarjeta"
+        style="
+          background-color: #f8fafc;
+          padding: 15px;
+          border-radius: 0 0 8px 8px;
+          margin: 30px -24px -24px -24px;
+        "
+      >
+        <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
+          <strong style="color: var(--color-azul-primario)"
+            >⚙️ Nota del Motor:</strong
           >
-          {{ form.nombres.errors|first }}
-        </section>
-
-        <h3
-          style="
-            font-size: 1.1rem;
-            color: var(--color-azul-primario);
-            margin-bottom: 15px;
-            border-bottom: 2px solid #f1f5f9;
-            padding-bottom: 5px;
-          "
-        >
-          2. Clasificación de Cartera
-        </h3>
-
-        <section style="margin-bottom: 20px">
-          <label for="{{ form.categoria_riesgo.id_for_label }}"
-            >Categoría de Riesgo Inicial:</label
-          >
-          {{ form.categoria_riesgo.errors|first }}
-          <small
-            style="
-              display: block;
-              margin-top: 6px;
-              color: var(--color-gris-texto);
-              font-size: 0.85rem;
-            "
-          >
-            Esta categoría condicionará los planes diferidos disponibles en
-            el módulo de ventas.
-          </small>
-        </section>
-
-        <nav style="display: flex; gap: 15px; margin-top: 35px">
-          <a
-            href="{% url 'principal_panel' %}"
-            class="btn btn--advertencia"
-            style="flex: 1; text-align: center"
-          >
-            Cancelar
-          </a>
-          <button type="submit" class="btn btn--exito" style="flex: 2">
-            Registrar Cliente en el Core
-          </button>
-        </nav>
-      </form>
-    </section>
-
-    <footer
-      class="pie-tarjeta"
-      style="
-        background-color: #f8fafc;
-        padding: 15px;
-        border-radius: 0 0 8px 8px;
-        margin: 30px -24px -24px -24px;
-      "
-    >
-      <p style="margin: 0; color: var(--color-texto); font-size: 0.9rem">
-        <strong style="color: var(--color-azul-primario)"
-          >⚙️ Nota del Motor:</strong
-        >
-        Al registrar al cliente, el sistema habilita automáticamente el
-        seguimiento de incidencias de mora total.
-      </p>
-    </footer>
-  </article>
-</main>
-{% endblock %}
+          Al registrar al cliente, el sistema habilita automáticamente el
+          seguimiento de incidencias de mora total.
+        </p>
+      </footer>
+    </article>
+  </main>
+  {% endblock %}
