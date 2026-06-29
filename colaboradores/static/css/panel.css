@@ -247,6 +247,66 @@ input:focus, select:focus, textarea:focus {
 .btn--peligro:hover { background-color: #334155; }
 
 /* =========================================================
+   MENÚ DESPLEGABLE (DROPDOWN) BLINDADO
+   ========================================================= */
+
+/* 1. Anclaje del padre */
+.menu-dropdown {
+    position: relative !important;
+}
+
+/* 2. Ocultar y estructurar la caja (Forzando la verticalidad) */
+ul.dropdown-content {
+    display: none !important; /* Oculto por defecto, sin excepciones */
+    position: absolute !important;
+    background-color: var(--color-blanco) !important; 
+    min-width: 250px !important; 
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1) !important; 
+    border: 1px solid var(--color-borde) !important;
+    border-radius: 8px !important; 
+    padding: 0 !important; 
+    top: 100% !important; 
+    right: 0 !important; 
+    flex-direction: column !important; /* Obliga a que sea vertical */
+    z-index: 2000 !important;    
+}
+
+/* 3. Mostrar el menú EXACTAMENTE cuando el mouse pasa por encima */
+.menu-dropdown:hover ul.dropdown-content {
+    display: flex !important;
+}
+
+/* 4. Estilos de los items internos para que no se hereden de la navbar */
+ul.dropdown-content li {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+}
+
+/* 5. Estilos de los botones/enlaces internos */
+ul.dropdown-content li a {
+    color: var(--color-texto) !important; 
+    padding: 14px 20px !important; 
+    display: block !important; 
+    border-bottom: 1px solid var(--color-borde) !important;
+    font-weight: 500 !important;
+    text-align: left !important;
+}
+
+/* 6. Efecto hover al pasar por los botones del desplegable */
+ul.dropdown-content li a:hover {
+    background-color: #F8FAFC !important;
+    color: var(--color-azul-primario) !important;
+    font-weight: 700 !important;
+    padding-left: 25px !important; /* Animación sutil */
+}
+
+/* Quitar la línea inferior del último elemento */
+ul.dropdown-content li:last-child a {
+    border-bottom: none !important;
+}
+
+/* =========================================================
    MÓDULOS ESPECÍFICOS (Login y Edición)
    ========================================================= */
 .pantalla-completa {

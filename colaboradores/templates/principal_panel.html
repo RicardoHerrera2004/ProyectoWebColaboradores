@@ -25,37 +25,28 @@
   <body>
     <header class="header-principal">
       <nav class="navbar">
-        <div style="display: flex; align-items: center; gap: 30px;">
-          <h2 style="margin: 0; color: var(--color-blanco);">Sistema CBR</h2>
-
-          <ul style="display: flex; gap: 20px; margin: 0; padding: 0; list-style: none;">
-            <li><a href="{% url 'principal_panel' %}" style="color: var(--color-blanco); font-weight: bold;">Tablero de Control</a></li>
-      
-            <li><a href="{% url 'lista_clientes' %}" style="color: var(--color-oro); font-weight: bold;">Cartera y Análisis CBR</a></li>
-
-            <li class="dropdown"><a href="#" style="color: #CBD5E1;">Ventas ▾</a>
-              <div class="dropdown-content">
-                <a href="{% url 'registrar_venta' %}">Registrar Nueva Venta</a> <a href="{% url 'historial_ventas' %}">Historial de Ventas</a> </div>
-            </li>
-
-            {% if request.user.is_staff %}
-            <li class="dropdown"><a href="#" style="color: #CBD5E1;">Panel Administrativo ⚙️ ▾</a>
-              <div class="dropdown-content">
-                <a href="{% url 'lista_vendedores' %}">Gestión de Colaboradores</a>
-                <a href="{% url 'lista_diferidos' %}">Parámetros Diferidos</a>
-                <a href="{% url 'lista_categorias' %}">Categorías de Riesgo</a>
-                <a href="{% url 'lista_tecnicas' %}">Motor CBR (Técnicas)</a>
-                <a href="{% url 'lista_productos' %}" style="border-top: 1px solid var(--color-borde); color: var(--color-azul-primario); font-weight: bold;">Catálogo de Productos</a>
-              </div>
-            </li>
-            {% endif %}
+        <h2>Sistema CBR</h2>
+        <menu>
+          <ul style="align-items: center;">
+              <li><a href="{% url 'principal_panel' %}">Tablero de Control</a></li>
+              <li><a href="{% url 'lista_clientes' %}">Cartera y Análisis CBR</a></li>
+              <li><a href="{% url 'historial_ventas' %}">Historial de Ventas</a></li>
+              <li class="menu-dropdown">
+                
+                <a href="#" style="color: var(--color-oro); font-weight: 700; padding-bottom: 10px;">
+                    Panel Administrativo ⚙️ ▾
+                </a>
+                
+                <ul class="dropdown-content">
+                    <li><a href="{% url 'lista_vendedores' %}">Gestión de Colaboradores</a></li>
+                    <li><a href="{% url 'lista_diferidos' %}">Parámetros Diferidos</a></li>
+                    <li><a href="{% url 'lista_categorias' %}">Categorías de Riesgo</a></li>
+                    <li><a href="{% url 'lista_tecnicas' %}">Motor CBR (Técnicas)</a></li>
+                    <li><a href="{% url 'lista_productos' %}">Catálogo de Productos</a></li>
+                </ul>
+              </li>
           </ul>
-        </div>
-
-        <div style="display: flex; align-items: center; gap: 15px;">
-          <span style="color: #CBD5E1; font-size: 0.9rem;">Hola, <strong style="color: var(--color-blanco);">{{ request.user.username }}</strong></span>
-          <a href="{% url 'vista_logout' %}" class="btn" style="background-color: var(--color-fondo-transparente); color: var(--color-blanco); padding: 6px 12px; font-size: 0.85rem;">Cerrar Sesión</a>
-        </div>
+        </menu>
       </nav>
     </header>
 

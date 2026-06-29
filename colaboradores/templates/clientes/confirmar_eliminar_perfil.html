@@ -1,0 +1,35 @@
+{% extends 'principal_panel.html' %} 
+
+{% block content %}
+<main style="display: flex; justify-content: center; padding-top: 50px; min-height: calc(100vh - 150px);">
+    <article style="background: white; padding: 40px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 500px; width: 100%; text-align: center;">
+        
+        <h2 style="color: #dc3545; margin-bottom: 15px; font-size: 1.8rem;">
+            ⚠️ Confirmar Eliminación
+        </h2>
+        
+        <p style="font-size: 1.1rem; color: #333; margin-bottom: 10px;">
+            ¿Está seguro de que desea eliminar el perfil socioeconómico del cliente <strong>{{ cliente.nombres }}</strong>?
+        </p>
+        
+        <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 30px; text-align: left;">
+            <small style="color: #856404; display: block; margin: 0;">
+                <strong>Nota del Motor:</strong> Borrar estos datos afectará directamente el cálculo del nivel de riesgo y la precisión del Motor CBR para futuras recomendaciones.
+            </small>
+        </div>
+
+        <form method="POST">
+            {% csrf_token %}
+            <nav style="display: flex; gap: 15px; justify-content: center;">
+                <a href="{% url 'ver_perfil_socioeconomico' cliente.id %}" style="padding: 10px 20px; background-color: #e2e8f0; color: #475569; text-decoration: none; border-radius: 5px; font-weight: 600; flex: 1;">
+                    Cancelar
+                </a>
+                <button type="submit" style="padding: 10px 20px; background-color: #dc3545; color: white; border: none; border-radius: 5px; font-weight: 600; cursor: pointer; flex: 1;">
+                    Sí, Eliminar Perfil
+                </button>
+            </nav>
+        </form>
+        
+    </article>
+</main>
+{% endblock %}

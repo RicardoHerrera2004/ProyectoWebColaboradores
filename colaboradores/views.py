@@ -12,8 +12,7 @@ from decimal import Decimal
 from .models import (Producto, Venta, Vendedor, Cliente, CategoriaRiesgo, Diferido, TecnicaMejora, HistorialGestion, PerfilSocioeconomico)
 from .forms import (ClienteForm, CategoriaRiesgoForm, DiferidoForm, TecnicaMejoraForm, HistorialGestionForm, VentaForm, CrearVendedorForm, EditarVendedorForm, PerfilSocioeconomicoForm)
 
-# Importamos solo los servicios vigentes (Tu nuevo Facade de IA y los cálculos financieros)
-from .services import GeneradorAnalisis, calcular_comision_vendedor_diferidos
+from .services import SistemaCoreFacade
 
 
 # ==========================================
@@ -31,7 +30,7 @@ def vista_login(request):
             return redirect('principal_panel')
     else:
         form = AuthenticationForm()
-    return render(request, 'login_usuario.html', {'form': form})
+    return render(request, 'core/login_usuario.html', {'form': form})
 
 def vista_logout(request):
     logout(request)
@@ -72,7 +71,7 @@ class DetalleRiesgoClienteView(View):
         cliente = get_object_or_404(Cliente, id=cliente_id)
         
         # Instanciamos el orquestador principal (Facade)
-        orquestador = GeneradorAnalisis()
+        orquestador = SistemaCoreFacade()
         
         # Procesamos al cliente (Ejecuta ScoringEngine y CBREngine por debajo)
         resultado_analisis = orquestador.procesar_cliente(cliente)
@@ -81,7 +80,7 @@ class DetalleRiesgoClienteView(View):
             'analisis': resultado_analisis
         }
         
-        return render(request, 'detalle_cliente.html', context)
+        return render(request, 'clientes/detalle_cliente.html', context)
 
 
 # ==========================================
@@ -105,7 +104,7 @@ def historial_ventas(request):
         'total_comisiones': round(total_comisiones, 2)
     }
     
-    return render(request, 'historial_ventas.html', contexto)
+    return render(request, 'ventas/historial_ventas.html', contexto)
 
 @login_required
 def registrar_venta(request):
@@ -127,7 +126,9 @@ def registrar_venta(request):
                 messages.error(request, 'Tu usuario no tiene un perfil de vendedor asignado.')
                 return redirect('principal_panel')
             
-            comision = calcular_comision_vendedor_diferidos(nueva_venta)
+            facade = SistemaCoreFacade()
+            comision = facade.obtener_comision_venta(nueva_venta)
+
             nueva_venta.comision_calculada = comision
             
             fecha_retroactiva = form.cleaned_data.get('fecha_manual')
@@ -141,7 +142,7 @@ def registrar_venta(request):
             messages.error(request, 'La venta no cumple con las políticas de riesgo crediticio.')
     else:
         form = VentaForm()
-    return render(request, 'registrar_venta.html', {'form': form})
+    return render(request, 'ventas/registrar_venta.html', {'form': form})
 
 @login_required
 def editar_venta(request, pk):
@@ -151,7 +152,8 @@ def editar_venta(request, pk):
         form = VentaForm(request.POST, instance=venta)
         if form.is_valid():
             venta_editada = form.save(commit=False)
-            comision = calcular_comision_vendedor_diferidos(venta_editada)
+            facade = SistemaCoreFacade()
+            comision = facade.obtener_comision_venta(venta_editada)
             venta_editada.comision_calculada = comision
             venta_editada.save() 
             
@@ -168,7 +170,7 @@ def editar_venta(request, pk):
             'fecha_manual': venta.fecha_emision.strftime('%Y-%m-%dT%H:%M') if venta.fecha_emision else None
         })
         
-    return render(request, 'registrar_venta.html', {'form': form, 'editando': True, 'venta': venta})
+    return render(request, 'ventas/registrar_venta.html', {'form': form, 'editando': True, 'venta': venta})
 
 @login_required
 def eliminar_venta(request, pk):
@@ -190,7 +192,7 @@ def eliminar_venta(request, pk):
         messages.warning(request, f'La venta #{id_removido} ha sido eliminada del sistema de auditoría.')
         return redirect('historial_ventas')
         
-    return render(request, 'confirmar_eliminar_venta.html', {'venta': venta})
+    return render(request, 'ventas/confirmar_eliminar_venta.html', {'venta': venta})
 
 @login_required
 def cargar_diferidos(request):
@@ -220,7 +222,7 @@ def registrar_gestion_mora(request):
     # Llamamos a nuestro nuevo Facade CBR en lugar de la función vieja
     recomendacion_cbr = None
     if cliente:
-        orquestador = GeneradorAnalisis()
+        orquestador = SistemaCoreFacade()
         analisis = orquestador.procesar_cliente(cliente)
         if analisis.tecnicas_recomendadas:
             recomendacion_cbr = analisis.tecnicas_recomendadas[0] # Extraemos el objeto RecomendacionTecnica
@@ -247,7 +249,7 @@ def registrar_gestion_mora(request):
         'cbr': recomendacion_cbr  
     }
     
-    return render(request, 'registrar_gestion.html', contexto)
+    return render(request, 'clientes/registrar_gestion.html', contexto)
 
 @login_required
 def editar_gestion_mora(request, pk):
@@ -255,7 +257,7 @@ def editar_gestion_mora(request, pk):
     cliente = gestion.cliente
     
     # Mantenemos el asistente del nuevo CBR visible
-    orquestador = GeneradorAnalisis()
+    orquestador = SistemaCoreFacade()
     analisis = orquestador.procesar_cliente(cliente)
     recomendacion_cbr = analisis.tecnicas_recomendadas[0] if analisis.tecnicas_recomendadas else None
 
@@ -275,7 +277,7 @@ def editar_gestion_mora(request, pk):
         'editando': True,
         'gestion': gestion
     }
-    return render(request, 'registrar_gestion.html', contexto)
+    return render(request, 'clientes/registrar_gestion.html', contexto)
 
 @login_required
 def eliminar_gestion_mora(request, pk):
@@ -287,7 +289,7 @@ def eliminar_gestion_mora(request, pk):
         messages.warning(request, 'La intervención ha sido eliminada del expediente.')
         return redirect('ver_historial_cliente', cliente_id=cliente_id)
         
-    return render(request, 'confirmar_eliminar_gestion.html', {'gestion': gestion})
+    return render(request, 'clientes/confirmar_eliminar_gestion.html', {'gestion': gestion})
 
 
 # ==========================================
@@ -297,7 +299,7 @@ def eliminar_gestion_mora(request, pk):
 @login_required
 def lista_clientes(request):
     clientes = Cliente.objects.select_related('categoria_riesgo').all()
-    return render(request, 'lista_clientes.html', {'clientes': clientes})
+    return render(request, 'clientes/lista_clientes.html', {'clientes': clientes})
 
 @login_required
 def registrar_cliente_admin(request):
@@ -309,7 +311,7 @@ def registrar_cliente_admin(request):
             return redirect('principal_panel')
     else:
         form = ClienteForm()
-    return render(request, 'registrar_cliente.html', {'form': form})
+    return render(request, 'clientes/registrar_cliente.html', {'form': form})
 
 @login_required
 def editar_cliente(request, pk):
@@ -339,7 +341,7 @@ def eliminar_cliente(request, pk):
 def ver_historial_cliente(request, cliente_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     historial = HistorialGestion.objects.filter(cliente=cliente).order_by('-fecha_aplicacion')
-    orquestador = GeneradorAnalisis()
+    orquestador = SistemaCoreFacade()
     analisis_ia = orquestador.procesar_cliente(cliente)
     contexto = {
         'cliente': cliente,
@@ -347,7 +349,7 @@ def ver_historial_cliente(request, cliente_id):
         'analisis': analisis_ia,
         'titulo': f'Historial de Gestión: {cliente.nombres}'
     }
-    return render(request, 'ver_historial_cliente.html', contexto)
+    return render(request, 'clientes/ver_historial_cliente.html', contexto)
 
 
 # ==========================================
@@ -360,7 +362,7 @@ def lista_vendedores(request):
         messages.error(request, "Acceso restringido a Recursos Humanos.")
         return redirect('panel_principal')
     vendedores = Vendedor.objects.select_related('user').all()
-    return render(request, 'lista_vendedores.html', {'vendedores': vendedores})
+    return render(request, 'administracion/lista_vendedores.html', {'vendedores': vendedores})
 
 @login_required(login_url='login_usuario')
 def crear_vendedor(request):
@@ -427,7 +429,7 @@ def editar_producto(request, producto_id):
         producto.stock = request.POST.get('stock')
         producto.save()
         return redirect('principal_panel')
-    return render(request, 'editar_producto.html', {'producto': producto})
+    return render(request, 'administracion/editar_producto.html', {'producto': producto})
 
 @login_required
 def eliminar_producto(request, producto_id):
@@ -443,7 +445,7 @@ def catalogo_productos(request):
     contexto = {
         'productos': productos_lista,
     }
-    return render(request, 'catalogo_productos.html', contexto)
+    return render(request, 'administracion/catalogo_productos.html', contexto)
 
 # ==========================================
 # 7. CRUD: CATEGORÍAS DE RIESGO
@@ -455,7 +457,7 @@ def lista_categorias(request):
         messages.error(request, "Acceso restringido a administradores.")
         return redirect('principal_panel')
     categorias = CategoriaRiesgo.objects.all()
-    return render(request, 'lista_categorias.html', {'categorias': categorias})
+    return render(request, 'administracion/lista_categorias.html', {'categorias': categorias})
 
 @login_required
 def crear_categoria(request):
@@ -508,7 +510,7 @@ def lista_diferidos(request):
         messages.error(request, "Acceso denegado. Se requieren permisos administrativos.")
         return redirect('principal_panel')
     diferidos = Diferido.objects.all().order_by('meses_plazo')
-    return render(request, 'lista_diferidos.html', {'diferidos': diferidos})
+    return render(request, 'administracion/lista_diferidos.html', {'diferidos': diferidos})
 
 @login_required
 def crear_diferido(request):
@@ -558,7 +560,7 @@ def lista_tecnicas(request):
         messages.error(request, "Acceso denegado. Solo los administradores pueden gestionar el repositorio CBR.")
         return redirect('principal_panel')
     tecnicas = TecnicaMejora.objects.all().order_by('nombre')
-    return render(request, 'lista_tecnicas.html', {'tecnicas': tecnicas})
+    return render(request, 'administracion/lista_tecnicas.html', {'tecnicas': tecnicas})
 
 @login_required
 def crear_tecnica(request):
@@ -638,7 +640,7 @@ def ver_perfil_socioeconomico(request, cliente_id):
     # Validamos si el cliente ya tiene un perfil creado usando hasattr (ideal para OneToOneFields)
     tiene_perfil = hasattr(cliente, 'perfil_socioeconomico')
     
-    return render(request, 'ver_perfil_socioeconomico.html', {
+    return render(request, 'clientes/ver_perfil_socioeconomico.html', {
         'cliente': cliente,
         'tiene_perfil': tiene_perfil
     })
@@ -653,7 +655,7 @@ def eliminar_perfil(request, cliente_id):
         return redirect('ver_perfil_socioeconomico', cliente_id=cliente.id)
     
     # Si entran por GET, mostramos una pantalla de confirmación
-    return render(request, 'confirmar_eliminar_perfil.html', {'cliente': cliente})
+    return render(request, 'clientes/confirmar_eliminar_perfil.html', {'cliente': cliente})
     
 
 #==================================================
@@ -673,14 +675,16 @@ def ajax_obtener_precio_producto(request):
 def ventas_por_cliente(request, cliente_id):
     cliente = get_object_or_404(Cliente, id=cliente_id)
     ventas = Venta.objects.select_related('diferido', 'colaborador').filter(cliente=cliente).order_by('-fecha_emision')
-    intereses = Venta.comision_calculada 
     
+    facade = SistemaCoreFacade()
+    
+    for venta in ventas:
+        venta.comision_calculada = facade.obtener_comision_venta(venta)
     
     contexto = {
         'cliente': cliente,
         'ventas': ventas,
         'titulo': f'Ventas Detalladas: {cliente.nombres}',
-        'interes': intereses
     }
     
-    return render(request, 'ver_ventas_cliente.html', contexto)
+    return render(request, 'ventas/ver_ventas_cliente.html', contexto)

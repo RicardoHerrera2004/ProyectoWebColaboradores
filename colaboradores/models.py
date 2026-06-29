@@ -134,13 +134,6 @@ class PerfilSocioeconomico(models.Model):
     def __str__(self):
         return f"Perfil de {self.cliente.nombres}"
 
-    class Meta:
-        verbose_name = 'Perfil Socioeconómico'
-        verbose_name_plural = 'Perfiles Socioeconómicos'
-
-    def __str__(self):
-        return f"Perfil de {self.cliente.nombres}"
-
 # ---------------------------------------------------------------
 # Modelos que no se van a utilizar especificamente para el CORE
 # ---------------------------------------------------------------
