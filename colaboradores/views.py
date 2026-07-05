@@ -695,34 +695,34 @@ def ventas_por_cliente(request, cliente_id):
 
 def api_v1_perfil_riesgo(request, cliente_id):
     try:
-        cliente = Cliente.objects.filter(id=cliente_id).first()
-        if not cliente:
-            cliente = Cliente.objects.filter(identificacion=str(cliente_id)).first()
+        # 1. Búsqueda intacta
+        cliente = Cliente.objects.filter(id=cliente_id).first() or \
+                  Cliente.objects.filter(identificacion=str(cliente_id)).first()
         
         if not cliente:
             return JsonResponse({"error": "Cliente no encontrado"}, status=404)
         
-        analizador = AnalizadorGestion()
+        # 2. Uso del FACADE (Aquí ocurre toda la magia)
+        facade = SistemaCoreFacade()
+        analisis = facade.procesar_cliente(cliente)
         
-        categoria = cliente.categoria_riesgo
-        tecnica_sugerida = analizador.obtenerEstrategiaRecomendada(cliente.incidencias_mora_total)
-        confianza = analizador.predecirTasaExito(tecnica_sugerida)
-        
+        # 3. Construcción del JSON usando el objeto AnalisisCompleto
         data = {
             "cliente_id": cliente.id,
-            "nombres": cliente.nombres, 
+            "nombres": cliente.nombres,
             "categoria_riesgo": {
-                "nombre": getattr(categoria, 'codigo', 'NO ASIGNADO'),
-                "descripcion": getattr(categoria, 'descripcion', 'N/A'),
-                "factor_severidad": getattr(categoria, 'factor_severidad', 0.0)
+                "nombre": analisis.perfil_riesgo.categoria_sugerida,
+                "score_porcentaje": float(analisis.perfil_riesgo.score_porcentaje),
+                "monto_mora": float(analisis.monto_total_mora)
             },
-            "score_mora": float(cliente.incidencias_mora_total * 10), 
+            "resumen_ejecutivo": analisis.resumen_ejecutivo,
             "recomendacion_cbr": {
-                "tecnica": getattr(tecnica_sugerida, 'nombre', 'Gestión Estándar'),
-                "similitud_confianza": round(float(confianza), 2)
+                "tecnica": analisis.tecnicas_recomendadas[0].tecnica.nombre if analisis.tecnicas_recomendadas else "Estrategia Estándar",
+                "similitud_confianza": round(float(analisis.tecnicas_recomendadas[0].confianza * 100), 2) if analisis.tecnicas_recomendadas else 0.0
             }
         }
+        
         return JsonResponse(data, status=200)
         
     except Exception as e:
-        return JsonResponse({"error": f"Error interno del servidor: {str(e)}"}, status=500)
+        return JsonResponse({"error": f"Error en el motor core: {str(e)}"}, status=500)
