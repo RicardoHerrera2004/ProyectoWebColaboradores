@@ -696,21 +696,30 @@ def ventas_por_cliente(request, cliente_id):
 def api_v1_perfil_riesgo(request, cliente_id):
     try:
         cliente = Cliente.objects.filter(id=cliente_id).first()
-        
         if not cliente:
             cliente = Cliente.objects.filter(identificacion=str(cliente_id)).first()
         
         if not cliente:
             return JsonResponse({"error": "Cliente no encontrado"}, status=404)
         
+        analizador = AnalizadorGestion()
+        
+        categoria = cliente.categoria_riesgo
+        tecnica_sugerida = analizador.obtenerEstrategiaRecomendada(cliente.incidencias_mora_total)
+        confianza = analizador.predecirTasaExito(tecnica_sugerida)
+        
         data = {
             "cliente_id": cliente.id,
             "nombres": cliente.nombres, 
-            "categoria_riesgo": getattr(cliente.categoria_riesgo, 'nombre', 'NO ASIGNADO'),
-            "score_mora": 12.0,
+            "categoria_riesgo": {
+                "nombre": getattr(categoria, 'codigo', 'NO ASIGNADO'),
+                "descripcion": getattr(categoria, 'descripcion', 'N/A'),
+                "factor_severidad": getattr(categoria, 'factor_severidad', 0.0)
+            },
+            "score_mora": float(cliente.incidencias_mora_total * 10), 
             "recomendacion_cbr": {
-                "tecnica": "Llamada de Asesoría Financiera",
-                "similitud_confianza": 74.94
+                "tecnica": getattr(tecnica_sugerida, 'nombre', 'Gestión Estándar'),
+                "similitud_confianza": round(float(confianza), 2)
             }
         }
         return JsonResponse(data, status=200)
