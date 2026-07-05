@@ -63,13 +63,11 @@ class AnalisisCompleto:
 # =============================================================================
 
 class EstrategiaSimilitud(ABC):
-    """Interfaz base para algoritmos de cálculo de distancia vectorial."""
     @abstractmethod
     def calcular(self, vec1: list, vec2: list) -> float:
         pass
 
 class SimilitudEuclidiana(EstrategiaSimilitud):
-    """Estrategia concreta que encapsula la fórmula matemática original."""
     def calcular(self, vec1: list, vec2: list) -> float:
         if len(vec1) != len(vec2):
             return 0.0

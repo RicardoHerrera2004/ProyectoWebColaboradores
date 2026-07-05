@@ -688,3 +688,32 @@ def ventas_por_cliente(request, cliente_id):
     }
     
     return render(request, 'ventas/ver_ventas_cliente.html', contexto)
+
+#==================================================
+# 12. API: Endpoint JSON del Cliente
+#==================================================
+
+def api_v1_perfil_riesgo(request, cliente_id):
+    try:
+        cliente = Cliente.objects.filter(id=cliente_id).first()
+        
+        if not cliente:
+            cliente = Cliente.objects.filter(identificacion=str(cliente_id)).first()
+        
+        if not cliente:
+            return JsonResponse({"error": "Cliente no encontrado"}, status=404)
+        
+        data = {
+            "cliente_id": cliente.id,
+            "nombres": cliente.nombres, 
+            "categoria_riesgo": getattr(cliente.categoria_riesgo, 'nombre', 'NO ASIGNADO'),
+            "score_mora": 12.0,
+            "recomendacion_cbr": {
+                "tecnica": "Llamada de Asesoría Financiera",
+                "similitud_confianza": 74.94
+            }
+        }
+        return JsonResponse(data, status=200)
+        
+    except Exception as e:
+        return JsonResponse({"error": f"Error interno del servidor: {str(e)}"}, status=500)

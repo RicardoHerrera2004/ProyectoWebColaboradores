@@ -85,4 +85,7 @@ urlpatterns = [
     # Visualizar Ventas detalladas por cliente
     
     path('clientes/<int:cliente_id>/ventas/', views.ventas_por_cliente, name='ventas_por_cliente'),
+    
+    # Endpoint API del cliente
+    path('api/v1/clientes/<int:cliente_id>/riesgo/', views.api_v1_perfil_riesgo, name='api_perfil_riesgo'),
 ]
