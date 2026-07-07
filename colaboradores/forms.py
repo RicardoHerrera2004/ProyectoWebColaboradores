@@ -11,14 +11,12 @@ class ClienteForm(forms.ModelForm):
     class Meta:
         model = Cliente
         fields = ['identificacion', 'nombres', 'categoria_riesgo']
-        # WIDGETS: Evitamos inputs simples. Forzamos un dropdown para la llave foránea.
         widgets = {
             'identificacion': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: 17xxxxxxx'}),
             'nombres': forms.TextInput(attrs={'class': 'form-control'}),
             'categoria_riesgo': forms.Select(attrs={'class': 'form-select'}) # Dropdown dependiente de la DB
         }
 
-    # Validación Back-End de dato sensible 
     def clean_identificacion(self):
         cedula = self.cleaned_data.get('identificacion')
 
@@ -31,9 +29,31 @@ class ClienteForm(forms.ModelForm):
         provincia = int(cedula[0:2])
         if provincia < 1 or (provincia > 24 and provincia != 30):
             raise ValidationError("El código de provincia de la cédula es inválido.")
+        
+        # 1. Validar el tercer dígito (Debe ser menor a 6 para personas naturales)
+        tercer_digito = int(cedula[2])
+        if tercer_digito >= 6:
+            raise ValidationError("El tercer dígito es inválido para una persona natural.")
+
+        coeficientes = [2, 1, 2, 1, 2, 1, 2, 1, 2]
+        total = 0
+        
+        for i in range(9):
+            valor = int(cedula[i]) * coeficientes[i]
+            if valor > 9:
+                valor -= 9
+            total += valor
+            
+        decena_superior = ((total + 9) // 10) * 10
+        digito_calculado = decena_superior - total
+        
+        if digito_calculado == 10:
+            digito_calculado = 0
+            
+        if digito_calculado != int(cedula[9]):
+            raise ValidationError("La cédula ingresada no es real (falló la verificación matemática).")
 
         return cedula
-
 
 # ---------------------------------------------------------
 # 2. FORMULARIO DE CATEGORÍA DE RIESGO
@@ -192,7 +212,9 @@ class VentaForm(forms.ModelForm):
         
         return cleaned_data
     
+# ---------------------------------------------------------
 # VENDEDORES/COLABORADORES
+# ---------------------------------------------------------
 
 class CrearVendedorForm(forms.ModelForm):
     username = forms.CharField(max_length=150, required=True, label="Nombre de Usuario para Login")
@@ -202,7 +224,30 @@ class CrearVendedorForm(forms.ModelForm):
         model = Vendedor
         fields = ['nombre_completo', 'email']
 
-    @transaction.atomic # Asegura que si falla una tabla, no se guarde la otra por error
+    # 1. Validación de Username (Nickname) único
+    def clean_username(self):
+        username = self.cleaned_data.get('username')
+        # Consultamos a la tabla User de Django
+        if User.objects.filter(username=username).exists():
+            raise ValidationError("Este nombre de usuario ya está en uso. Por favor, elige un nickname diferente.")
+        return username
+
+    # 2. Validación de Email único
+    def clean_email(self):
+        email = self.cleaned_data.get('email')
+        if User.objects.filter(email=email).exists() or Vendedor.objects.filter(email=email).exists():
+            raise ValidationError("Este correo electrónico ya está registrado en el perfil de otro colaborador.")
+        return email
+
+    # 3. Validación de Nombre Completo único
+    def clean_nombre_completo(self):
+        nombre = self.cleaned_data.get('nombre_completo')
+        # Usamos __iexact para que la validación ignore mayúsculas y minúsculas 
+        if Vendedor.objects.filter(nombre_completo__iexact=nombre).exists():
+            raise ValidationError("Ya existe un colaborador registrado exactamente con este nombre.")
+        return nombre
+
+    @transaction.atomic 
     def save(self, commit=True):
         # 1. Crear la cuenta de acceso de Django
         user = User.objects.create_user(
@@ -268,3 +313,32 @@ class PerfilSocioeconomicoForm(forms.ModelForm):
         super().__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'form-control'})
+            
+
+# ==============================================
+# 9. FORMULARIO DE PRODUCTO
+# ==============================================
+
+class ProductoForm(forms.ModelForm):
+    class Meta:
+        model = Producto
+        # Asegúrate de que estos campos coincidan con los de tu modelo original
+        fields = ['codigo_sku', 'nombre', 'precio', 'stock', 'tipo']
+        
+        widgets = {
+            'codigo_sku': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Ej: SKU-1001'}),
+            'nombre': forms.TextInput(attrs={'class': 'form-control'}),
+            'precio': forms.NumberInput(attrs={'class': 'form-control', 'step': '0.01'}),
+            'stock': forms.NumberInput(attrs={'class': 'form-control'}),
+            'tipo': forms.Select(attrs={'class': 'form-select'})
+        }
+
+    # Validación específica para el SKU
+    def clean_codigo_sku(self):
+        sku = self.cleaned_data.get('codigo_sku')
+        
+        # Le preguntamos a la base de datos si el producto ya existe
+        if Producto.objects.filter(codigo_sku=sku).exists():
+            raise ValidationError(f'El código SKU "{sku}" ya existe en el sistema. Usa uno diferente.')
+            
+        return sku

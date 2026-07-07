@@ -15,39 +15,65 @@
                 Agregar nuevo producto
             </h2>    
         </header>
-        <form action="{%url 'crear_producto' %}" method="POST" class="formulario-horizontal">
+        <form action="{% url 'crear_producto' %}" method="POST" class="formulario-horizontal">
             
             {% csrf_token %}
 
             <fieldset style="border: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; align-items: end;">
         
                 <div class="campo">
-                    <label for="sku" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">SKU</label>
-                    <input type="text" name="sku" id="sku" placeholder="Ej: OLLA-01" required />
+                    <label for="id_codigo_sku" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">SKU</label>
+                    {{ form.codigo_sku }}
+                    
+                    {% if form.codigo_sku.errors %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 5px;">
+                            {{ form.codigo_sku.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
         
                 <div class="campo" style="grid-column: span 2;">
-                    <label for="nombre" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Nombre Comercial</label>
-                    <input type="text" name="nombre" id="nombre" placeholder="Nombre completo del producto" required />
+                    <label for="id_nombre" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Nombre Comercial</label>
+                    {{ form.nombre }}
+                    
+                    {% if form.nombre.errors %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 5px;">
+                            {{ form.nombre.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
         
                 <div class="campo">
-                    <label for="tipo" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Categoría</label>
-                    <select name="tipo" id="tipo" required>
-                        <option value="OLLA">Olla Individual</option>
-                        <option value="SET">Set Completo</option>
-                        <option value="REPUESTO">Repuesto</option>
-                    </select>
+                    <label for="id_tipo" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Categoría</label>
+                    {{ form.tipo }}
+                    
+                    {% if form.tipo.errors %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 5px;">
+                            {{ form.tipo.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
         
                 <div class="campo">
-                    <label for="precio" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Precio Base ($)</label>
-                    <input type="number" name="precio" id="precio" placeholder="0.00" step="0.01" required />
+                    <label for="id_precio" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Precio Base ($)</label>
+                    {{ form.precio }}
+                    
+                    {% if form.precio.errors %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 5px;">
+                            {{ form.precio.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
         
                 <div class="campo">
-                    <label for="stock" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Stock Inical</label>
-                    <input type="number" name="stock" id="stock" placeholder="0" required />
+                    <label for="id_stock" style="display: block; margin-bottom: 5px; font-size: 0.85rem; font-weight: bold; color: var(--color-gris-texto);">Stock Inicial</label>
+                    {{ form.stock }}
+                    
+                    {% if form.stock.errors %}
+                        <div style="color: #dc3545; font-size: 0.85rem; margin-top: 5px;">
+                            {{ form.stock.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
         
                 <button type="submit" class="btn btn--exito" style="height: 44px;">

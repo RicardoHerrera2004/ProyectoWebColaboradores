@@ -1,3 +1,5 @@
+from urllib import request
+
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
@@ -8,9 +10,10 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.db.models import Sum
 from decimal import Decimal
+from django.db import IntegrityError
 
 from .models import (Producto, Venta, Vendedor, Cliente, CategoriaRiesgo, Diferido, TecnicaMejora, HistorialGestion, PerfilSocioeconomico)
-from .forms import (ClienteForm, CategoriaRiesgoForm, DiferidoForm, TecnicaMejoraForm, HistorialGestionForm, VentaForm, CrearVendedorForm, EditarVendedorForm, PerfilSocioeconomicoForm)
+from .forms import (ClienteForm, CategoriaRiesgoForm, DiferidoForm, ProductoForm, TecnicaMejoraForm, HistorialGestionForm, VentaForm, CrearVendedorForm, EditarVendedorForm, PerfilSocioeconomicoForm)
 
 from .services import SistemaCoreFacade
 
@@ -308,7 +311,7 @@ def registrar_cliente_admin(request):
         if form.is_valid():
             cliente = form.save()
             messages.success(request, f'Cliente {cliente.nombres} registrado con validación exitosa.')
-            return redirect('principal_panel')
+            return redirect('lista_clientes')
     else:
         form = ClienteForm()
     return render(request, 'clientes/registrar_cliente.html', {'form': form})
@@ -368,15 +371,18 @@ def lista_vendedores(request):
 def crear_vendedor(request):
     if not request.user.is_staff:
         return redirect('panel_principal')
+        
     if request.method == 'POST':
         form = CrearVendedorForm(request.POST)
-        if form.is_valid():
+        if form.is_valid(): 
             form.save()
-            messages.success(request, 'Colaborador creado. Ya puede iniciar sesión en el sistema.')
+            messages.success(request, 'Colaborador creado con éxito.')
             return redirect('lista_vendedores')
     else:
         form = CrearVendedorForm()
+        
     return render(request, 'formulario_generico.html', {'form': form, 'titulo': 'Registrar Nuevo Colaborador'})
+
 
 @login_required(login_url='login_usuario')
 def editar_vendedor(request, pk):
@@ -410,15 +416,23 @@ def eliminar_vendedor(request, pk):
 @login_required
 def crear_producto(request):
     if request.method == 'POST':
-        Producto.objects.create(
-            codigo_sku=request.POST.get('sku'),
-            nombre=request.POST.get('nombre'),
-            precio=request.POST.get('precio'),
-            stock=request.POST.get('stock'),
-            tipo=request.POST.get('tipo', 'OLLA')
-        )
-        messages.success(request, 'Producto añadido al catálogo.')
-    return redirect('principal_panel')
+        form = ProductoForm(request.POST)
+        
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Producto añadido al catálogo.')
+            return redirect('lista_productos')
+            
+        else:
+            # Si hay error (como el SKU duplicado), devolvemos la página con los mensajes rojos
+            productos = Producto.objects.all()
+            return render(request, 'administracion/catalogo_productos.html', {
+                'productos': productos,
+                'form': form
+            })
+            
+    # Si entran a la URL por primera vez (GET), los redirigimos al catálogo
+    return redirect('lista_productos')
 
 @login_required
 def editar_producto(request, producto_id):
@@ -440,12 +454,14 @@ def eliminar_producto(request, producto_id):
 
 @login_required
 def catalogo_productos(request):
-    productos_lista = Producto.objects.all().order_by('nombre') 
+    productos = Producto.objects.all() 
     
-    contexto = {
-        'productos': productos_lista,
-    }
-    return render(request, 'administracion/catalogo_productos.html', contexto)
+    form = ProductoForm() 
+    
+    return render(request, 'administracion/catalogo_productos.html', {
+        'productos': productos, 
+        'form': form
+    })
 
 # ==========================================
 # 7. CRUD: CATEGORÍAS DE RIESGO
