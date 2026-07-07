@@ -6,16 +6,15 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  // Función que se ejecuta al enviar el formulario
   const buscarCliente = (e) => {
-    e.preventDefault(); // Evita que la página se recargue
+    e.preventDefault();
     if (!busqueda.trim()) return;
 
     setLoading(true);
     setError(null);
     setData(null);
 
-    // Inyectamos lo que el usuario escribió en la URL
+    // URL ajustada a tu endpoint del backend
     fetch(`https://proyectowebcolaboradores.onrender.com/api/v1/clientes/${busqueda}/riesgo/`)
       .then((response) => {
         if (!response.ok) throw new Error('Cliente no encontrado en la base de datos');
@@ -43,7 +42,6 @@ function App() {
       padding: '20px'
     }}>
       
-      {/* Barra de Búsqueda */}
       <form onSubmit={buscarCliente} style={{ marginBottom: '24px', display: 'flex', gap: '10px', width: '100%', maxWidth: '500px' }}>
         <input 
           type="text" 
@@ -73,11 +71,9 @@ function App() {
         </button>
       </form>
 
-      {/* Estados de Carga y Error */}
       {loading && <div style={{ padding: '20px', color: '#64748B' }}>Consultando Motor CBR...</div>}
       {error && <div style={{ padding: '20px', color: '#B91C1C', backgroundColor: '#FEE2E2', borderRadius: '8px', width: '100%', maxWidth: '500px', textAlign: 'center' }}>⚠️ {error}</div>}
 
-      {/* Tarjeta de Resultados (Solo se muestra si hay data) */}
       {data && (
         <div style={{
           backgroundColor: '#FFFFFF',
@@ -103,7 +99,8 @@ function App() {
 
             <div style={{ marginBottom: '20px', fontSize: '0.95rem' }}>
               <span style={{ color: '#64748B', fontWeight: '500' }}>Categoría de Riesgo:</span> 
-              <span style={{
+              {/* Acceso seguro a la propiedad nombre del objeto */}
+              <span title={data.categoria_riesgo.descripcion} style={{
                 marginLeft: '8px',
                 backgroundColor: '#FAFAFA',
                 padding: '4px 10px',
@@ -111,7 +108,12 @@ function App() {
                 border: '1px solid #E2E8F0',
                 fontWeight: 'bold',
                 color: '#1E3A8A'
-              }}>{data.categoria_riesgo}</span>
+              }}>{data.categoria_riesgo.nombre}</span>
+            </div>
+
+            {/* Resumen ejecutivo extraído del Facade */}
+            <div style={{ marginBottom: '20px', fontSize: '0.9rem', color: '#475569', fontStyle: 'italic' }}>
+              {data.resumen_ejecutivo}
             </div>
 
             <div style={{

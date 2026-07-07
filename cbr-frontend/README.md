@@ -1,16 +1,41 @@
-# React + Vite
+# CBR Frontend - Sistema de Gestión de Riesgo Crediticio
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Este proyecto constituye la interfaz de usuario (Frontend) del **Sistema de Gestión Operativa y Control de Riesgo Crediticio**. Desarrollado como parte del proyecto de la materia de Ingeniería Web, este dashboard permite a los colaboradores consultar perfiles de riesgo y recibir recomendaciones tácticas basadas en un motor de Razonamiento Basado en Casos (CBR).
 
-Currently, two official plugins are available:
+## 🚀 Características
+- **Dashboard Analítico:** Visualización del perfil de riesgo del cliente en tiempo real[cite: 1].
+- **Integración con Motor CBR:** Consumo de API para sugerencias de recuperación de cartera[cite: 1].
+- **Diseño Responsivo:** Interfaz intuitiva para la gestión operativa[cite: 1].
+- **Arquitectura Desacoplada:** Comunicación vía RESTful API con el backend en Django[cite: 1].
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🛠 Tecnologías Utilizadas
+- **Framework:** React / Vite
+- **Lenguaje:** JavaScript
+- **Despliegue:** Render[cite: 1]
 
-## React Compiler
+## 💻 Configuración Local
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. **Clonar el repositorio:**
+   ```bash
+   git clone [https://github.com/RicardoHerrera2004/cbr-frontend-ui.git](https://github.com/RicardoHerrera2004/cbr-frontend-ui.git) ```
 
-## Expanding the ESLint configuration
+Instalar dependencias:
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+ ```bash
+npm install
+```
+
+Ejecutar en desarrollo:
+
+```Bash
+npm run dev
+```
+
+🌐 Despliegue
+El proyecto está desplegado y en funcionamiento en:
+https://cbr-frontend-ui.onrender.com
+
+👤 Autor
+Ricardo Herrera Acurio
+
+Facultad de Ingeniería y Ciencias Aplicadas - UDLA
